@@ -16,7 +16,7 @@ function ChatWindow() {
     useEffect(() => {
         const login = async () => {
             try {
-                const response = await axios.post(`${API_URL}/api/login`);
+                const response = await axios.post("/api/login");
                 const token = response.data.access_token;
                 setJwtToken(token);
             } catch (error) {
@@ -47,7 +47,7 @@ function ChatWindow() {
         try {
             // Send the user's message to the API and get the bot's response
             const response = await axios.post(
-                `${API_URL}/api/chat`,
+                "/api/chat",
                 { response: userMessage, widget_type: widgetType, widget_config: widgetConfig },
                 { headers: { Authorization: `Bearer ${jwtToken}` } }
             );

@@ -1,4 +1,5 @@
-from .logger_setup import setup_logger
+
+from logger_setup import setup_logger
 import json
 from flask import Flask, request, jsonify
 from langchain_community.chat_message_histories import (
@@ -17,8 +18,8 @@ import uuid
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
-from .db import db_create_entry, db_get_entry, db_append_list, db_update_entry, db_add_message
-from .bot import parse_user_message
+from db import db_create_entry, db_get_entry, db_append_list, db_update_entry, db_add_message
+from bot import parse_user_message
 
 logger = setup_logger()
 
@@ -26,7 +27,7 @@ app = Flask(__name__)
 CORS(
     app,
     supports_credentials=True, 
-    origins=["http://localhost:3000"], # You'll need this, you cannot use * (wildcard domain) when using supports_credentials=True
+    origins=["http://localhost:3000", "http://localhost"], # can't use * (wildcard domain) when using supports_credentials=True
 )
 
 # setup JWT
@@ -46,13 +47,8 @@ def login():
     ip_address = request.remote_addr
     db_create_entry(chat_id, ip_address=ip_address)
     
-    return jsonify(access_token=access_token)
+    return jsonify(access_token=access_token), 200
 
-@app.route('/api/test_chat', methods=['POST'])
-@jwt_required()
-def test_chat():
-    print("chat")
-    return jsonify({'response': 'Hello, world!'})
 
 @app.route('/api/chat', methods=['POST'])
 @jwt_required()
@@ -80,34 +76,22 @@ def chat():
     print(f'user_message: {user_message}')
     
     # Error checking
-    if not user_message:
-        return jsonify({'response': 'error: missing message'})
-    if not user_widget_type:
-        return jsonify({'response': 'error: missing widget_type'})
+    # if not user_message:
+    #     return jsonify({'response': 'error: missing message'})
+    # if not user_widget_type:
+    #     return jsonify({'response': 'error: missing widget_type'})
     
     
     # Parse out specific data from the user message and get next message
     next_msg = parse_user_message(chat_id, request_data)
     logger.debug(next_msg)
-    for msg in next_msg['messages']:
-        db_add_message(chat_id, "bot", msg)
+    db_add_message(chat_id, "bot", next_msg)
     
     
     logger.debug(f'app message send: {json.dumps(next_msg, indent=2)}')
     return jsonify(next_msg), 200
 
-# def process_user_input(user_input, widget_type):
-#     # Basic processing based on widget type
-#     if widget_type == 'text':
-#         return f"You said: {user_input}"
-#     elif widget_type == 'number':
-#         return f"You entered the number: {user_input}"
-#     elif widget_type == 'select':
-#         return f"You selected: {user_input}"
-#     else:
-#         return f"Received: {user_input}"
-    
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=80)
+    app.run(debug=False)

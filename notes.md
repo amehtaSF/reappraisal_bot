@@ -25,3 +25,8 @@ Widget properties:
 - text: no additional properties
 - slider: min, max, default, step
 - multiselect: options (list of dicts with keys "val" and "label")
+
+
+changes made for dockerization
+- REACT_APP_FLASK_API_URL=http://localhost:8000  - dropped port
+- dropped period to indicate relative imports for python packages.

@@ -1,0 +1,15 @@
+version: '3'
+services:
+  flask-backend:
+    build: ./flask-backend
+    expose:
+      - "8000"  # Flask backend runs on port 8000
+    environment:
+      - FLASK_ENV=production
+
+  chatbot-frontend:
+    build: ./chatbot-frontend
+    ports:
+      - "80:80"  # Serve the frontend on port 80
+    depends_on:
+      - flask-backend

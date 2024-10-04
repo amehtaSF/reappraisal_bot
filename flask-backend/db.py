@@ -1,5 +1,5 @@
 import boto3
-from .logger_setup import setup_logger
+from logger_setup import setup_logger
 import os
 import uuid
 from datetime import datetime, timezone
@@ -112,14 +112,19 @@ def db_update_nested_field(chat_id, list_name, index, field, new_value):
     )
 
 def db_append_list(chat_id, key, value):
-    '''Append any value (str, dict, etc.) to an existing list in the DynamoDB table'''
+    '''Append any value (str, dict, etc.) or extend a list of values to an existing list in the DynamoDB table'''
+
+    # Ensure the value is a list
+    if not isinstance(value, list):
+        value = [value]
+    
     table.update_item(
         Key={
             'chat_id': str(chat_id)
         },
         UpdateExpression=f"SET {key} = list_append(if_not_exists({key}, :empty_list), :val)",
         ExpressionAttributeValues={
-            ':val': [value],  # Append the value (wrapped in a list for list_append)
+            ':val': value,
             ':empty_list': []  # Fallback to an empty list if the key doesn't exist
         },
         ReturnValues="UPDATED_NEW"
