@@ -1,11 +1,13 @@
 import boto3
-
+from .logger_setup import setup_logger
 import os
 import uuid
 from datetime import datetime, timezone
 from datetime import datetime
 from dotenv import load_dotenv
 
+
+logger = setup_logger()
 load_dotenv()
 
 
@@ -21,20 +23,6 @@ dynamodb = boto3.resource(
     region_name=region_name
 )
 
-'''
-db schema
-{
-    chat_id: str  # unique id
-    token: str  # security token for the chat
-    created: str  # timestamp of when the chat was created
-    token_expiration: str  # timestamp of when the chat will expire
-    messages: list  # list of 3-tuples with values for role, content, and timestamp
-    completed: int  # 0 if the chat is not completed, 1 if the chat is completed
-    prolific_id: str  # prolific id of the user
-}
-
-'''
-
 
 table = dynamodb.Table(os.getenv('DYNAMODB_TABLE_NAME'))
 
@@ -48,19 +36,33 @@ def db_create_entry(chat_id, **kwargs):
         "completed": 0,  # 0 if the chat is not completed, 1 if the chat is completed,
         "state": "begin",
         "ip_address": "",
-        "emotions": [],  # list of len 3 where each element is a dict with keys emotion and reason. if emotion == other, then there is another key called other_emotion
+        "emotions": [],  # list of len 1-3 where each element is a dict with keys emotion. 
         "vals": [],  # list of len 15 with dicts with keys "value_text", "value_num", "value_rating"
+        "reappraisals": [],  # list of len 3 with dicts with keys "reappraisal", "reappraisal_value", "value_rank", "rating", "efficacy", "believability"
         # "prolific_id": "",
         # "person_values": {"v" + str(i+1): int(-99) for i in range(16)},
         # "issue": "",
         # "issue_summary_bot": "",
         # "issue_summary": "",
         # "crisis_input": "",
-        # "reappraisals": [{"reappraisal": "", "reappraisal_value": "", "value_rank": "", "rating": "", "efficacy": "", "believability": "", "rank": ""} for _ in range(3)], 
     }
     item.update(kwargs)
     table.put_item(Item=item)
     return chat_id
+
+def db_add_message(chat_id, sender, data):
+    '''Add a message to the messages list in the table'''
+    if sender not in ["user", "bot"]:
+        raise ValueError("Sender must be 'user' or 'bot'")
+    msg = {
+        "sender": sender,
+        "response": data['response'],
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "widget_type": data['widget_type'],
+        "widget_config": data.get("widget_config", {})
+    }
+    db_append_list(chat_id, "messages", msg)
+        
 
 def db_get_entry(chat_id):
     '''Get an entry from the table'''

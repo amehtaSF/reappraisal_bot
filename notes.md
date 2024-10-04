@@ -8,6 +8,7 @@ Bot flow
     - get reappraisal
 
 
+todo: enforce 1-3 emotions
 
 
 

@@ -20,6 +20,9 @@ solicit_issue: |
   <p>Note: I am unable to help with any issues related to suicide, self-harm, or physical or sexual violence. For issues like these, please seek the help of a professional human.</p>
 
 
-collect_emos: |
+solicit_emotions: |
   <p>Please select 1-3 emotions that you are feeling from the list.</p>
 
+solicit_values: |
+  <p>Please rate how important the following value is to you in your career.</p>
+  <p>{value}</p>

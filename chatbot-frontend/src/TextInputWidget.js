@@ -5,7 +5,7 @@ function TextInputWidget({ onSend }) {
 
     const handleSend = () => {
         if (input.trim() === '') return;
-        onSend(input);
+        onSend(input); // Send the input 
         setInput('');
     };
 

@@ -1,3 +1,5 @@
+from .logger_setup import setup_logger
+import json
 from flask import Flask, request, jsonify
 from langchain_community.chat_message_histories import (
     DynamoDBChatMessageHistory,
@@ -14,7 +16,10 @@ import uuid
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
-from .db import db_create_entry, db_get_entry
+from .db import db_create_entry, db_get_entry, db_append_list, db_update_entry, db_add_message
+from .bot import parse_user_message
+
+logger = setup_logger()
 
 app = Flask(__name__)
 CORS(
@@ -79,43 +84,33 @@ def chat():
     
     # Get the request data
     data = request.get_json()
+    user_msg = {
+        'sender': 'user',
+        'response': data.get('response'),
+        'widget_type': data.get('widget_type'),
+        'widget_config': data.get('widget_config', {}),
+        'timestamp': datetime.now().isoformat()
+    }
+    db_add_message(chat_id, "user", user_msg)
+    logger.debug(f'user message received: {json.dumps(user_msg, indent=2)}')
     user_widget_type = data.get('widget_type')
     user_widget_config = data.get('widget_config', {})
-    user_message = data.get('user_message')
+    user_message = data.get('response')
+    print(f'user_message: {user_message}')
     
     # Error checking
     if not user_message:
         return jsonify({'response': 'error: missing message'})
     if not user_widget_type:
         return jsonify({'response': 'error: missing widget_type'})
-
-    # Process user input and generate a response
-    response = process_user_input(user_input, widget_type)
-
-    # Store the conversation
-    # messages.append({
-    #     'user': user_input,
-    #     'bot': response,
-    #     'widget_type': widget_type,
-    #     'timestamp': datetime.now().isoformat()
-    # })
-    messages.append({
-        'sender': 'user',
-        'text': user_message,
-        'widget_type': user_widget_type,
-        'widget_config': user_widget_config,
-        'timestamp': datetime.now().isoformat()
-    })
-    messages.append({
-        'sender': 'bot',
-        'text': response,
-        'widget_type': widget_type,
-        'widget_config': widget_config,
-        'timestamp': datetime.now().isoformat()
-    })
-
-
-    return jsonify({'response': response})
+    
+    
+    # Parse out specific data from the user message and get next message
+    next_msg = parse_user_message(chat_id, data)
+    
+    db_add_message(chat_id, "bot", next_msg)
+    logger.debug(f'app message send: {json.dumps(next_msg, indent=2)}')
+    return jsonify(next_msg), 200
 
 # def process_user_input(user_input, widget_type):
 #     # Basic processing based on widget type

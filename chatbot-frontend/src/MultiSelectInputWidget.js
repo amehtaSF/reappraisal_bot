@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 
-function MultiSelectInputWidget({ onSend, options = [] }) {
+function MultiSelectInputWidget({ onSend, options = []}) {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
-  // Handle selection changes
-  const handleSelectionChange = (event) => {
-    const selected = Array.from(event.target.selectedOptions, (option) => option.value);
-    setSelectedOptions(selected);
+  // Handle option click to toggle selection
+  const handleOptionClick = (value) => {
+    setSelectedOptions((prevSelected) =>
+      prevSelected.includes(value)
+        ? prevSelected.filter((option) => option !== value)
+        : [...prevSelected, value]
+    );
   };
 
   // Handle sending the selected options
@@ -18,14 +21,26 @@ function MultiSelectInputWidget({ onSend, options = [] }) {
 
   return (
     <div className="multiselect-input-widget">
-      <select multiple value={selectedOptions} onChange={handleSelectionChange} size={options.length > 5 ? 5 : options.length}>
-        {options.map((option, index) => (
-          <option key={index} value={option.value || option}>
-            {option.label || option}
-          </option>
-        ))}
-      </select>
-      <button onClick={handleSend}>Send</button>
+      <div className="options-container">
+        {options.map((option, index) => {
+          const value = option.value || option;
+          const label = option.label || option;
+          const isSelected = selectedOptions.includes(value);
+
+          return (
+            <button
+              key={index}
+              className={`option-button ${isSelected ? 'selected' : ''}`}
+              onClick={() => handleOptionClick(value)}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+      <button className="send-button" onClick={handleSend}>
+        Send
+      </button>
     </div>
   );
 }

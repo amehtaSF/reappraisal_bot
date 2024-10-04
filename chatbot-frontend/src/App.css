@@ -38,7 +38,7 @@
 }
 
 
-
+/* Message Display */
 .message-list {
   max-height: 600px; 
   overflow-y: auto;
@@ -58,4 +58,201 @@
   background-color: #f1f1f1;
   align-self: flex-start;
   text-align: left;
+}
+
+
+/* MultiSelect Component */
+.multiselect-input-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.options-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.option-button {
+  padding: 10px 15px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  background-color: #f2f2f2;
+  color: #333;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.option-button.selected {
+  background-color: #4caf50; /* Green background for selected */
+  color: white;
+}
+
+.option-button:hover {
+  background-color: #e0e0e0;
+}
+
+.send-button {
+  padding: 10px 20px;
+  background-color: #2196f3; /* Blue background for send button */
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.send-button:hover {
+  background-color: #1976d2;
+}
+
+/* General styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.chat-window {
+  width: 500px;
+  max-width: 100%;
+  height: 600px;
+  background-color: #fff;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 15px;  /* Add padding to create space between content and border */
+}
+
+.message-list {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;  /* Ensure messages can scroll */
+  border-bottom: 1px solid #ddd;
+}
+
+.message {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 90%;  /* Extend message width */
+  word-wrap: break-word;
+}
+
+.user-message {
+  background-color: #daf1ff;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.bot-message {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+  text-align: left;
+}
+
+/* Input widget styles */
+.text-input-widget,
+.multiselect-input-widget,
+.slider-input-widget {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.text-input-widget input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+.text-input-widget button,
+.multiselect-input-widget button,
+.slider-input-widget button {
+  padding: 5px 10px;  /* Adjust this for smaller padding */
+  font-size: 12px;  /* Adjust this for smaller font size */
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.text-input-widget button:hover,
+.multiselect-input-widget button:hover,
+.slider-input-widget button:hover {
+  background-color: #0056b3;
+}
+
+/* Slider widget */
+.slider-input-widget {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+}
+
+.slider-input-widget input[type='range'] {
+  flex: 1;
+  margin-right: 10px; /* Space between the slider and the number label */
+}
+
+.slider-input-widget span {
+  padding-left: 10px;
+  padding-right: 15px; /* Increase space between the number label and the Send button */
+  font-size: 16px;
+}
+
+.slider-input-widget button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Multiselect widget */
+.multiselect-input-widget {
+  flex-direction: column;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0;  /* Remove any padding from the container */
+}
+
+.multiselect-input-widget select {
+  flex: 1;
+  padding: 3px;
+  font-size: 12px;
+  margin-right: 10px;  /* Adjust this if needed */
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.multiselect-input-widget button {
+  margin: 3px 2px;  /* 3px for top/bottom, 2px for left/right to minimize space */
+  padding: 5px 8px;  /* Adjust padding if needed */
+  font-size: 12px;
+}
+
+/* Slider widget */
+.slider-input-widget input[type='range'] {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.slider-input-widget span {
+  padding-left: 10px;
+  font-size: 16px;
 }
