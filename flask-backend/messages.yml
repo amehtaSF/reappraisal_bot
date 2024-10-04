@@ -12,17 +12,23 @@ introduction: |
 
 
 solicit_issue: |
-  <p>Please tell me about an issue in your life that is currently bothering you <strong>in the domain of your career</strong>. 
+  Please tell me about an issue in your life that is currently bothering you <strong>in the domain of your career</strong>. 
   This could be an issue related to job searching, career advancement opportunities, 
   work-life balance, workplace environment and culture, job satisfaction, 
   salary and benefits, remote work challenges, job security, 
-  or any other other issues.</p>
+  or any other other issues.
   <p>Note: I am unable to help with any issues related to suicide, self-harm, or physical or sexual violence. For issues like these, please seek the help of a professional human.</p>
 
 
 solicit_emotions: |
-  <p>Please select 1-3 emotions that you are feeling from the list.</p>
+  Please select 1-3 emotions that you are feeling from the list.
+
+explain_emotions_end: |
+  Thank you for sharing about your situation. We will now move to the next phase.
 
 solicit_values: |
-  <p>Please rate how important the following value is to you in your career.</p>
-  <p>{value}</p>
+  Please rate how important the following value is to you in your career.
+  <p><i>{value}</i></p>
+
+finished: |
+  This study is now complete. Thank you for your thoughtful participation!

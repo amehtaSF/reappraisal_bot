@@ -38,7 +38,7 @@ def db_create_entry(chat_id, **kwargs):
         "ip_address": "",
         "emotions": [],  # list of len 1-3 where each element is a dict with keys emotion. 
         "vals": [],  # list of len 15 with dicts with keys "value_text", "value_num", "value_rating"
-        "reappraisals": [],  # list of len 3 with dicts with keys "reappraisal", "reappraisal_value", "value_rank", "rating", "efficacy", "believability"
+        "reappraisals": [],  # list of len 3 with dicts with keys "reap_text", "value_text", "value_rank", "value_rating", "reap_efficacy", "reap_believability"
         # "prolific_id": "",
         # "person_values": {"v" + str(i+1): int(-99) for i in range(16)},
         # "issue": "",

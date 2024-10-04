@@ -83,19 +83,19 @@ def chat():
     messages = user_data.get('messages', [])
     
     # Get the request data
-    data = request.get_json()
+    request_data = request.get_json()
     user_msg = {
         'sender': 'user',
-        'response': data.get('response'),
-        'widget_type': data.get('widget_type'),
-        'widget_config': data.get('widget_config', {}),
+        'response': request_data.get('response'),
+        'widget_type': request_data.get('widget_type'),
+        'widget_config': request_data.get('widget_config', {}),
         'timestamp': datetime.now().isoformat()
     }
     db_add_message(chat_id, "user", user_msg)
     logger.debug(f'user message received: {json.dumps(user_msg, indent=2)}')
-    user_widget_type = data.get('widget_type')
-    user_widget_config = data.get('widget_config', {})
-    user_message = data.get('response')
+    user_widget_type = request_data.get('widget_type')
+    user_widget_config = request_data.get('widget_config', {})
+    user_message = request_data.get('response')
     print(f'user_message: {user_message}')
     
     # Error checking
@@ -106,9 +106,11 @@ def chat():
     
     
     # Parse out specific data from the user message and get next message
-    next_msg = parse_user_message(chat_id, data)
+    next_msg = parse_user_message(chat_id, request_data)
+    for msg in next_msg['messages']:
+        db_add_message(chat_id, "bot", msg)
     
-    db_add_message(chat_id, "bot", next_msg)
+    
     logger.debug(f'app message send: {json.dumps(next_msg, indent=2)}')
     return jsonify(next_msg), 200
 

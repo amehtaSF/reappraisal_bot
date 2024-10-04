@@ -9,35 +9,32 @@ function ChatWindow() {
     const [widgetConfig, setWidgetConfig] = useState({});
     const [jwtToken, setJwtToken] = useState(null);
 
-    const messageListRef = useRef(null);  // Reference for the message list container
+    const messageListRef = useRef(null);
 
-    // Get the API URL from the environment variable
     const API_URL = process.env.REACT_APP_FLASK_API_URL;
 
-    // Login and retrieve the JWT token when the component is mounted
     useEffect(() => {
         const login = async () => {
-            console.log('Logging in...', API_URL);
             try {
                 const response = await axios.post(`${API_URL}/api/login`);
                 const token = response.data.access_token;
-                setJwtToken(token); // Store the JWT token in state
+                setJwtToken(token);
             } catch (error) {
                 console.error('Login failed', error);
             }
         };
-
-        login(); // Call the login function when the component mounts
+        login();
     }, [API_URL]);
 
-    // Scroll to the bottom of the message list when messages change
     useEffect(() => {
         if (messageListRef.current) {
             messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
         }
     }, [messages]);
 
-    // Function to send a message to the chat API (onSend callback)
+    // Function to add a delay between each message
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
     const sendMessage = async (userMessage) => {
         // Show the user's message immediately
         setMessages((prevMessages) => [
@@ -54,29 +51,29 @@ function ChatWindow() {
             // Send the user's message to the API and get the bot's response
             const response = await axios.post(
                 `${API_URL}/api/chat`,
-                { response: userMessage, 
-                    widget_type: widgetType,
-                    widget_config: widgetConfig },
-                {
-                    headers: {
-                        Authorization: `Bearer ${jwtToken}` // Include JWT token in Authorization header
-                    }
-                }
+                { response: userMessage, widget_type: widgetType, widget_config: widgetConfig },
+                { headers: { Authorization: `Bearer ${jwtToken}` } }
             );
 
-            const botMessage = response.data.response;
-            const newWidgetType = response.data.widget_type || 'text'; // Retrieve new widget type from API
-            const newWidgetConfig = response.data.widget_config || {}; // Retrieve new widget config from API
+            const botMessages = response.data.messages;  // Expecting a list of messages
 
-            // Append the bot's response once it's ready
-            setMessages((prevMessages) => [
-                ...prevMessages,
-                { sender: 'bot', text: botMessage },
-            ]);
+            // Loop through each message with a delay between them
+            for (const message of botMessages) {
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    { sender: 'bot', text: message.response }
+                ]);
+                setWidgetType(message.widget_type || 'text');
+                setWidgetConfig(message.widget_config || {});
 
-            // Update widget type and config based on the bot response
-            setWidgetType(newWidgetType);
-            setWidgetConfig(newWidgetConfig);
+                // Scroll to the bottom after adding each message
+                if (messageListRef.current) {
+                    messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+                }
+
+                // Wait for 1 second before displaying the next message
+                await delay(1000);
+            }
         } catch (error) {
             console.error('Error sending message:', error);
         }
@@ -84,7 +81,6 @@ function ChatWindow() {
 
     return (
         <div className="chat-window">
-            {/* Pass messageListRef to the MessageList component */}
             <MessageList messages={messages} messageListRef={messageListRef} />
             <InputWidget widgetType={widgetType} onSend={sendMessage} widgetConfig={widgetConfig} />
         </div>
