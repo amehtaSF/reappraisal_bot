@@ -27,8 +27,25 @@ explain_emotions_end: |
   Thank you for sharing about your situation. We will now move to the next phase.
 
 solicit_values: |
-  Please rate how important the following value is to you in your career.
+  Please rate how important the following value is to you in your career on a scale of 0-100:
   <p><i>{value}</i></p>
+
+intro_reappraisal: |
+  We will now shift to the final part of the study. 
+  <p>In this part of the study, you will be offered 3 alternative ways of looking at the situation
+  that could potentially help you feel better. Please read each alternative perspective
+  and answer honestly the questions associated with each perspective. 
+  </p>
+  <p>Please keep in mind that these perspectives might not help you feel better at all
+  so just answer the questions honestly whether you find the perspectives helpful or not.</p>
+  <p>Send any message to continue.</p>
+
+reappraisal_believability: |
+  How believable do you find this alternative perspective on a scale of 0-100?
+
+reappraisal_success: |
+  How successful is this alternative perspective in helping you feel better on a scale of 0-100?
+
 
 finished: |
   This study is now complete. Thank you for your thoughtful participation!

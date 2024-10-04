@@ -13,7 +13,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Reappraisal Bot</h1>
+      <h1>Reframing Bot</h1>
       <ChatWindow />
     </div>
   );

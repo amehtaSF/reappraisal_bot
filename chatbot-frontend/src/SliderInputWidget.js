@@ -1,22 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-function SliderInputWidget({ onSend, min = 0, max = 100, step = 1, start = 50 }) {
+function SliderInputWidget({ onSend, min = 0, max = 100, step = 1, start = 50, isSending }) {
   const [value, setValue] = useState(start);
 
-  // Reset the slider value whenever the "start" prop changes
   useEffect(() => {
     setValue(start); // Reset the value to the "start" value when the widget is re-rendered
   }, [start]);
 
-  // Memoize handleSend to prevent it from being recreated on each render
   const handleSend = useCallback(() => {
     onSend(value);  // Send the most up-to-date slider value
   }, [onSend, value]);
 
-  // Attach event listener to the whole widget for keydown events
   useEffect(() => {
     const handleKeyPress = (event) => {
-      if (event.key === 'Enter') {
+      if (event.key === 'Enter' && !isSending) {
         handleSend();  // Trigger sending when Enter is pressed
       }
     };
@@ -26,7 +23,7 @@ function SliderInputWidget({ onSend, min = 0, max = 100, step = 1, start = 50 })
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [handleSend]);  // Now handleSend is a stable reference
+  }, [handleSend, isSending]);
 
   return (
     <div className="slider-input-widget">
@@ -37,9 +34,12 @@ function SliderInputWidget({ onSend, min = 0, max = 100, step = 1, start = 50 })
         step={step}
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        disabled={isSending}  // Disable slider when sending
       />
       <span>{value}</span>
-      <button onClick={handleSend}>Send</button>
+      <button onClick={handleSend} disabled={isSending}>
+        Send
+      </button>
     </div>
   );
 }

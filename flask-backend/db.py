@@ -4,7 +4,11 @@ import os
 import uuid
 from datetime import datetime, timezone
 from datetime import datetime
+import random
+import yaml
+from decimal import Decimal
 from dotenv import load_dotenv
+
 
 
 logger = setup_logger()
@@ -26,6 +30,8 @@ dynamodb = boto3.resource(
 
 table = dynamodb.Table(os.getenv('DYNAMODB_TABLE_NAME'))
 
+with open("bot.yml", "r") as ymlfile:
+    bot_data = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
 def db_create_entry(chat_id, **kwargs):
     '''Initialize a new entry in the table'''
@@ -33,6 +39,7 @@ def db_create_entry(chat_id, **kwargs):
         "chat_id": chat_id,
         "created": datetime.now(timezone.utc).isoformat(),
         "messages": [],  # list of dicts with keys "sender", "text", "timestamp", "widget_type", "widget_config"
+        "issue_messages": [],  # subset list of messages that are the users issue, emotions, and explanations for emotions
         "completed": 0,  # 0 if the chat is not completed, 1 if the chat is completed,
         "state": "begin",
         "ip_address": "",
@@ -118,9 +125,3 @@ def db_append_list(chat_id, key, value):
         ReturnValues="UPDATED_NEW"
     )
 
-# def db_add_message(chat_id, role, content):
-#     '''Add a message to the messages list in the table'''
-#     role = str(role)
-#     content = str(content)
-#     timestamp = datetime.now(timezone.utc).isoformat()
-#     db_append_list(chat_id, "messages", (role, content, timestamp))

@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from langchain_community.chat_message_histories import (
     DynamoDBChatMessageHistory,
 )
+from decimal import Decimal
 import os
 from flask_jwt_extended import (
     JWTManager,
@@ -31,26 +32,6 @@ CORS(
 # setup JWT
 app.config["JWT_SECRET_KEY"] = os.environ['JWT_SECRET_KEY']
 jwt = JWTManager(app)
-
-# setup chat history 
-# chat_history = []
-# lc_history = DynamoDBChatMessageHistory(table_name=os.environ['DYNAMODB_TABLE_NAME'], session_id="0")
-
-'''
-bot can send different kinds of messages. messages sent from bot take the form of a dictionary with the following keys:
-- message: the text of the message
-- widget_type: the type of widget to display (e.g., text, select)
-- widget_config: a dictionary with additional properties for the widget (e.g., options for a select widget)
-- state: a string with the current state of the conversation 
-    - solicit_issue
-    - solicit_emotions
-    - collect_reap_feedback
-
-Widget properties:
-- text: no additional properties
-- slider: min, max, default, step
-- multiselect: options (list of dicts with keys "val" and "label")
-'''
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -107,6 +88,7 @@ def chat():
     
     # Parse out specific data from the user message and get next message
     next_msg = parse_user_message(chat_id, request_data)
+    logger.debug(next_msg)
     for msg in next_msg['messages']:
         db_add_message(chat_id, "bot", msg)
     
