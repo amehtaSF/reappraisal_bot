@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-function MultiSelectInputWidget({ onSend, options = []}) {
+function MultiSelectInputWidget({ onSend, options = [] }) {
   const [selectedOptions, setSelectedOptions] = useState([]);
 
   // Handle option click to toggle selection
@@ -12,12 +12,27 @@ function MultiSelectInputWidget({ onSend, options = []}) {
     );
   };
 
-  // Handle sending the selected options
-  const handleSend = () => {
+  // Memoize handleSend to prevent it from being recreated on each render
+  const handleSend = useCallback(() => {
     if (selectedOptions.length > 0) {
       onSend(selectedOptions);
     }
-  };
+  }, [onSend, selectedOptions]);
+
+  // Attach event listener to the whole widget for keydown events
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === 'Enter') {
+        handleSend(); // Trigger sending when Enter is pressed
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleSend]); // Now handleSend is a stable reference
 
   return (
     <div className="multiselect-input-widget">

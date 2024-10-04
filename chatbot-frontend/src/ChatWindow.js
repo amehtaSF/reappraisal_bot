@@ -32,9 +32,6 @@ function ChatWindow() {
         }
     }, [messages]);
 
-    // Function to add a delay between each message
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
     const sendMessage = async (userMessage) => {
         // Show the user's message immediately
         setMessages((prevMessages) => [
@@ -72,7 +69,7 @@ function ChatWindow() {
                 }
 
                 // Wait for 1 second before displaying the next message
-                await delay(1000);
+                await new Promise((resolve) => setTimeout(resolve, 1000));
             }
         } catch (error) {
             console.error('Error sending message:', error);
@@ -82,7 +79,13 @@ function ChatWindow() {
     return (
         <div className="chat-window">
             <MessageList messages={messages} messageListRef={messageListRef} />
-            <InputWidget widgetType={widgetType} onSend={sendMessage} widgetConfig={widgetConfig} />
+            {/* Ensure unique key based on widgetConfig to force reset */}
+            <InputWidget
+                key={widgetType + JSON.stringify(widgetConfig)}
+                widgetType={widgetType}
+                onSend={sendMessage}
+                widgetConfig={widgetConfig}
+            />
         </div>
     );
 }
