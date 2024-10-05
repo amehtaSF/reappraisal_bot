@@ -133,6 +133,22 @@
   margin: 3px 2px;
   padding: 5px 8px;
   font-size: 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.multiselect-input-widget button:hover {
+  background-color: #0056b3;
+}
+
+.multiselect-text-input{
+  width: 75%; 
+  height: 80px; 
+  padding: 5px; 
+  font-size: 14px; 
 }
 
 /* General styles */

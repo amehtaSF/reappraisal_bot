@@ -58,7 +58,7 @@ def bot_solicit_emotions() -> List[Dict[str, Any]]:
     resp = {
         "sender": "bot",
         "response": msgs["solicit_emotions"],
-        "widget_type": "multiselect",
+        "widget_type": "multiselecttext",
         "widget_config": {
             "options": bot_data["emotions"]
         }
@@ -81,7 +81,7 @@ def bot_explain_emotions(chat_id, emotions) -> List[Dict[str, Any]]:
 def bot_solicit_values(chat_id) -> List[Dict[str, Any]]:
     vals = db_get_vals(chat_id)  # Get values that have already been collected
     done_val_nums = [int(val.get("value_num")) for val in vals if val.get("value_num") is not None]  # Get value numbers already collected
-    remaining = [int(i) for i in range(bot_data['num_values']) if int(i) not in done_val_nums]  # Get value numbers not collected
+    remaining = [int(i) for i in range(len(bot_data['vals'])) if int(i) not in done_val_nums]  # Get value numbers not collected
     if remaining:
         val_num = random.choice(remaining)
         resp = {
@@ -234,7 +234,7 @@ def convert_to_lc_history(chat_history):
 
 def get_max_min_person_value(chat_id):
     vals = db_get_vals(chat_id)
-    assert len(vals) == bot_data["num_values"], "Not all values have been collected"
+    assert len(vals) == len(bot_data['vals']), "Not all values have been collected"
     val_ratings = [val.get("value_rating") for val in vals if val.get("value_rating") is not None]
     max_val = max(val_ratings)
     min_val = min(val_ratings)

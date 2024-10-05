@@ -1,21 +1,20 @@
-vals:
-  0: 'financial success through artistic/creative expression'
-  1: 'entrepreneurial independence and self-sufficiency'
-  2: 'financial stability'
-  3: 'alignment your of career with personal passions and values'
-  4: 'excellence and dedication in your professional endeavors'
-  5: 'flexibility and adaptability in your career choices and environments'
-  6: 'work-life balance and prioritizing family and personal well-being over career ambitions'
-  7: 'ethical conduct in your professional environment'
-  8: 'reliability in your career'
-  9: 'career advancement and professional growth'
-  10: 'mentorship and supportive leadership'
-  11: 'helping others as part of your career'
-  12: 'education, continuous personal and professional growth through education and skill development'
-  13: 'autonomy in professional life and decision-making, creativity and autonomy in professional pursuits'
-  14: 'recognition and respect in professional accomplishments, achievement and recognition in professional pursuits'
+# - 'financial success through artistic/creative expression'
 
-num_values: 15
+vals:
+  - 'entrepreneurial independence and self-sufficiency'
+  - 'financial stability'
+  - 'alignment your of career with personal passions and values'
+  - 'dedication to excellence in your professional endeavors'
+  - 'flexibility and adaptability in your career choices'
+  - 'work-life balance and prioritizing family and personal well-being over career ambitions'
+  - 'ethical conduct in your professional environment'
+  - 'reliability in your career'
+  - 'career advancement and professional growth'
+  - 'mentorship and supportive leadership'
+  - 'helping others as part of your career'
+  - 'education, continuous personal and professional growth through education and skill development'
+  - 'autonomy in professional life and decision-making, creativity and autonomy in professional pursuits'
+  - 'recognition and respect in professional accomplishments, achievement and recognition in professional pursuits'
 
 emotions: 
   - stressed

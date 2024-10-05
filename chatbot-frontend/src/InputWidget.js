@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TextInputWidget from './TextInputWidget';
 import MultiSelectInputWidget from './MultiSelectInputWidget';
+import MultiSelectTextInputWidget from './MultiSelectTextInputWidget';
 import SliderInputWidget from './SliderInputWidget'; 
 
 function InputWidget({ widgetType = 'text', onSend, widgetConfig = {} }) {  
@@ -9,6 +10,7 @@ function InputWidget({ widgetType = 'text', onSend, widgetConfig = {} }) {
   const widgetComponents = {
     text: TextInputWidget,
     multiselect: MultiSelectInputWidget,
+    multiselecttext: MultiSelectTextInputWidget,
     slider: SliderInputWidget,
   };
 
