@@ -21,7 +21,8 @@ solicit_issue: |
 
 
 solicit_emotions: |
-  Please select 1-3 emotions that you are feeling from the list.
+  Please select 1-3 emotions that you are feeling from the list. 
+  You may also write in an emotion if you would like to input something not captured in the list
 
 explain_emotions_end: |
   Thank you for sharing about your situation. We will now move to the next phase.
