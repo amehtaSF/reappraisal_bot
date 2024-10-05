@@ -7,7 +7,19 @@ import json
 import random
 from decimal import Decimal
 from datetime import datetime
-from db import db_get_entry, db_update_entry, db_update_nested_field, db_append_list, db_add_message
+from db import (
+    db_add_message, 
+    db_add_value, 
+    db_add_reappraisal,
+    db_set_state, 
+    db_set_emotions, 
+    db_get_state, 
+    db_get_vals, 
+    db_get_messages, 
+    db_get_issue_messages, 
+    db_get_reappraisals, 
+    db_get_emotions
+)
 from runnables import explain_emotions, generate_value_reap, generate_general_reap
 
 
@@ -24,7 +36,16 @@ with open("messages.yml", "r") as ymlfile:
 
 # The "bot_" functions construct messages for the bot to send to the user
 
-def bot_solicit_issue(data):
+def bot_hello() -> List[Dict[str, Any]]:
+    resp = {
+        "sender": "bot",
+        "response": msgs["introduction"],
+        "widget_type": "text",
+        "widget_config": {}
+    }
+    return [resp]
+
+def bot_solicit_issue() -> List[Dict[str, Any]]:
     resp = {
         "sender": "bot",
         "response": msgs["solicit_issue"],
@@ -33,7 +54,7 @@ def bot_solicit_issue(data):
     }
     return [resp]
 
-def bot_solicit_emotions(data):
+def bot_solicit_emotions() -> List[Dict[str, Any]]:
     resp = {
         "sender": "bot",
         "response": msgs["solicit_emotions"],
@@ -44,10 +65,10 @@ def bot_solicit_emotions(data):
     }
     return [resp]
 
-def bot_explain_emotions(data):
-    lc_history = get_lc_history(data["messages"])
-    # logger.debug(json.dumps(data["messages"], indent=2))
-    selected_emotions = [emo.get("emotion") for emo in data.get("emotions", []) if emo.get("emotion")]
+def bot_explain_emotions(chat_id, emotions) -> List[Dict[str, Any]]:
+    messages = db_get_messages(chat_id)
+    lc_history = convert_to_lc_history(messages)
+    selected_emotions = [emo.get("emotion") for emo in emotions if emo.get("emotion")]
     msg = explain_emotions.invoke({"messages": lc_history, "emotions": selected_emotions})
     resp = {
         "sender": "bot",
@@ -57,13 +78,10 @@ def bot_explain_emotions(data):
     }
     return [resp]
 
-def bot_solicit_values(data):
-    vals = data.get("vals", [])
-    # logger.debug(f'vals: {vals}')
-    done_val_nums = [int(val.get("value_num")) for val in vals if val.get("value_num") is not None]
-    # logger.debug(f'done_val_nums: {done_val_nums}')
-    remaining = [int(i) for i in range(bot_data['num_values']) if int(i) not in done_val_nums]
-    # logger.debug(f'remaining: {remaining}')
+def bot_solicit_values(chat_id) -> List[Dict[str, Any]]:
+    vals = db_get_vals(chat_id)  # Get values that have already been collected
+    done_val_nums = [int(val.get("value_num")) for val in vals if val.get("value_num") is not None]  # Get value numbers already collected
+    remaining = [int(i) for i in range(bot_data['num_values']) if int(i) not in done_val_nums]  # Get value numbers not collected
     if remaining:
         val_num = random.choice(remaining)
         resp = {
@@ -84,25 +102,29 @@ def bot_solicit_values(data):
     else:
         return {"error": "All values have been collected"}
     
-def bot_reappraise(data):
+def bot_reappraise(chat_id) -> List[Dict[str, Any]]:
     
-    max_val_dict, min_val_dict = get_max_min_person_value(data)
+    max_val_dict, min_val_dict = get_max_min_person_value(chat_id)
     
     # Identify the next reappraisal condition
-    finished_reaps = data.get("reappraisals", [])
+    finished_reaps = db_get_reappraisals(chat_id)
     finished_conditions = [reap.get("value_rank") for reap in finished_reaps]  # max, min, general
     unfinished_conditions = [cond for cond in ["max", "min", "general"] if cond not in finished_conditions]
     assert len(unfinished_conditions) > 0, "All reappraisals have been completed"
     next_condition = random.choice(unfinished_conditions)
     next_reap_num = len(finished_reaps) + 1
     
+    # Get issue messages
+    issue_messages = db_get_issue_messages(chat_id)
+    lc_history = convert_to_lc_history(issue_messages)
+    
     # Generate a reappraisal message
     if next_condition == "max":
-        reap = generate_value_reap.invoke({"messages": get_lc_history(data["issue_messages"]), "value": max_val_dict})
+        reap = generate_value_reap.invoke({"messages": lc_history, "value": max_val_dict})
     elif next_condition == "min":
-        reap = generate_value_reap.invoke({"messages": get_lc_history(data["issue_messages"]), "value": min_val_dict})
+        reap = generate_value_reap.invoke({"messages": lc_history, "value": min_val_dict})
     elif next_condition == "general":
-        reap = generate_general_reap.invoke({"messages": get_lc_history(data["issue_messages"])})
+        reap = generate_general_reap.invoke({"messages": lc_history})
     reap = reap.replace("\n", "<br>")
     
     # Add the reappraisal to the database
@@ -114,12 +136,12 @@ def bot_reappraise(data):
         value_dict = None
     reap_dict = {
         "reap_text": reap,
+        "reap_num": next_reap_num,
         "value_text": value_dict.get("value_text") if value_dict else "",
         "value_rank": next_condition,
-        "value_rating": value_dict.get("value_rating") if value_dict else "",
-        "reap_efficacy": ""
+        "value_rating": value_dict.get("value_rating") if value_dict else ""
     }
-    db_append_list(data["chat_id"], "reappraisals", reap_dict)
+    db_add_reappraisal(chat_id, **reap_dict)
     
     # Compose the bot response
     resp = [{
@@ -127,7 +149,8 @@ def bot_reappraise(data):
         "response": f"Perspective {next_reap_num} of 3:",
         "widget_type": "text",
         "widget_config": {}
-    }, {
+    }, 
+    {
         "sender": "bot",
         "response": reap,
         "widget_type": "text",
@@ -136,24 +159,58 @@ def bot_reappraise(data):
                 "msg_type": "reappraisal",
                 "condition": next_condition}
         }
-    }, {
+    }, 
+    {
         "sender": "bot",
-        "response": msgs["reappraisal_success"],
-        "widget_type": "slider",
-        "widget_config": {
-            "metadata": {
-                "msg_type": "reappraisal_success",
-                "condition": next_condition,
-                "reap_num": next_reap_num},
-            "min": 0,
-            "max": 100,
-            "start": 50,
-            "step": 1
-        }
+        "response": f"Send any message to continue.",
+        "widget_type": "text",
+        "widget_config": {}
+    }, 
+    ]
+    return resp
+
+
+def bot_judge_reappraisals(chat_id) -> List[Dict[str, Any]]:
+    
+    reaps = db_get_reappraisals(chat_id)
+    unjudged_reaps = [reap for reap in reaps if reap.get("reap_efficacy") is None]
+    assert len(unjudged_reaps) > 0, "All reappraisals have been judged"
+    cur_reap = unjudged_reaps[0]
+    reap_text = cur_reap.get("reap_text")
+    reap_num = cur_reap.get("reap_num")
+    condition = cur_reap.get("value_rank")
+    resp = [
+        {
+            "sender": "bot",
+            "response": f"Perspective {reap_num} of 3:",
+            "widget_type": "text",
+            "widget_config": {}
+        },
+        {
+            "sender": "bot",
+            "response": reap_text,
+            "widget_type": "text",
+            "widget_config": {}
+        },
+        {
+            "sender": "bot",
+            "response": msgs["reappraisal_success"],
+            "widget_type": "slider",
+            "widget_config": {
+                "metadata": {
+                    "msg_type": "reappraisal_success",
+                    "condition": condition,
+                    "reap_num": reap_num},
+                "min": 0,
+                "max": 100,
+                "start": 50,
+                "step": 1
+            }
     }]
     return resp
 
-def bot_finished(data):
+
+def bot_finished() -> List[Dict[str, Any]]:
     resp = {
         "sender": "bot",
         "response": msgs["finished"],
@@ -162,7 +219,8 @@ def bot_finished(data):
     }
     return [resp]
 
-def get_lc_history(chat_history):
+
+def convert_to_lc_history(chat_history):
     '''
     Convert chat history to langchain format
     '''
@@ -174,8 +232,8 @@ def get_lc_history(chat_history):
             lc_history.append(HumanMessage(str(msg["response"])))
     return lc_history
 
-def get_max_min_person_value(user_data):
-    vals = user_data.get("vals", [])
+def get_max_min_person_value(chat_id):
+    vals = db_get_vals(chat_id)
     assert len(vals) == bot_data["num_values"], "Not all values have been collected"
     val_ratings = [val.get("value_rating") for val in vals if val.get("value_rating") is not None]
     max_val = max(val_ratings)
@@ -195,61 +253,59 @@ def parse_user_message(chat_id, request_data):
     Parses the user message and calls function to return the appropriate bot response.
     '''
     
-    user_data = db_get_entry(chat_id)
-    prev_state = user_data["state"]
+    prev_state = db_get_state(chat_id)
     logger.debug(f'chat_id: {chat_id}')
     logger.debug(f'prev_state: {prev_state}')
     logger.debug(f'message: {request_data["response"]}')
-    bot_msg = {"messages": []}
+    bot_msgs = []
     if prev_state == "begin":
         
         # Update state
-        next_state = "solicit_issue"
-        db_update_entry(chat_id, "state", next_state)
-        user_data['state'] = next_state
+        db_set_state(chat_id, "hello")
+        bot_msgs += bot_hello()
         
-        bot_msg["messages"] += bot_solicit_issue(user_data)
+        
+    elif prev_state == "hello":
+        
+        db_set_state(chat_id, "solicit_issue")
+        bot_msgs += bot_solicit_issue()
     
     elif prev_state == "solicit_issue":
         
         # Update state
-        next_state = "solicit_emotions"
-        db_update_entry(chat_id, "state", next_state)
-        user_data['state'] = next_state
+        db_set_state(chat_id, "solicit_emotions")
         
-        bot_msg["messages"] += bot_solicit_emotions(user_data)
+        bot_msgs += bot_solicit_emotions()
     
     elif prev_state == "solicit_emotions":
+        
+        # Update state
+        db_set_state(chat_id, "explain_emotions")
         
         # Parse and store selected emotions
         emotions = request_data.get("response", [])
         emotions = [{"emotion": emo} for emo in emotions]
-        db_update_entry(chat_id, "emotions", emotions)
-        user_data['emotions'] = emotions
+        db_set_emotions(chat_id, emotions)
         
-        # Update state
-        next_state = "explain_emotions"
-        db_update_entry(chat_id, "state", next_state)
-        user_data['state'] = next_state
-        
-        bot_msg["messages"] += bot_explain_emotions(user_data)
+        # Get next bot message
+        bot_msgs += bot_explain_emotions(chat_id, emotions)
     
     elif prev_state == "explain_emotions":
         
+        emotions = db_get_emotions(chat_id)
+        logger.debug(f'emotions: {emotions}')
+        
         # Get next bot message or detect stage completion
-        bot_msg_explain_emos = bot_explain_emotions(user_data)
+        bot_msg_explain_emos = bot_explain_emotions(chat_id, emotions)
         bot_msg_text = bot_msg_explain_emos[0]['response']
+        
+        # If stage is completed...
         if "::finished::" in bot_msg_text.lower():
             # Update state
-            next_state = "solicit_values"
-            db_update_entry(chat_id, "state", next_state)
-            user_data['state'] = next_state
-            
-            # Save subset of conversation related to issue and emotions
-            db_update_entry(chat_id, "issue_messages", user_data["messages"])
+            db_set_state(chat_id, "solicit_values")
             
             # Add end of explain emotions message
-            bot_msg["messages"] += [{
+            bot_msgs += [{
                 "sender": "bot",
                 "response": msgs["explain_emotions_end"],
                 "widget_type": "text",
@@ -257,55 +313,82 @@ def parse_user_message(chat_id, request_data):
             }]
             
             # Add solicit_values message
-            bot_msg["messages"] += bot_solicit_values(user_data)
+            bot_msgs += bot_solicit_values(chat_id)
+        
+        # If state is ongoing...
         else:
-            next_state = "explain_emotions"
-            bot_msg["messages"] += bot_msg_explain_emos
+            bot_msgs += bot_msg_explain_emos
     
     elif prev_state == "solicit_values":
         
         # Save values to database
-        # logger.debug(f'request_data: {json.dumps(request_data, indent=2)}')
         value_num = int(request_data['widget_config']['metadata'].get("val_num"))
         value_rating = int(request_data.get("response"))
         value_text = bot_data["vals"][value_num]
-        val_db_entry = {"value_text": value_text, "value_num": value_num, "value_rating": value_rating}
-        db_append_list(chat_id, "vals", val_db_entry)
-        user_data['vals'].append(val_db_entry)
+        db_add_value(chat_id, value_text, value_num, value_rating)
+        
+        user_vals = db_get_vals(chat_id)
         
         # Generate next message
-        if len(user_data['vals']) < len(bot_data["vals"]):
-            bot_msg["messages"] += bot_solicit_values(user_data)
+        if len(user_vals) < len(bot_data["vals"]):
+            bot_msgs += bot_solicit_values(chat_id)
         else:
-            # Introduce reappraisal
-            # next_state = "reap_intro"
-            # db_update_entry(chat_id, "state", next_state)
-            # user_data['state'] = next_state
-            bot_msg["messages"].append({
+            bot_msgs.append({
                 "sender": "bot",
                 "response": msgs['intro_reappraisal'],
                 "widget_type": "text",
                 "widget_config": {}
             })
-            next_state = "reappraisal"
-            db_update_entry(chat_id, "state", next_state)
-            user_data['state'] = next_state
+            db_set_state(chat_id, "reappraisal")
 
         
     elif prev_state == "reappraisal":
-        finished_reaps = user_data.get("reappraisals", [])
+        # Show each reappraisal one by one
+        finished_reaps = db_get_reappraisals(chat_id)
+        # logger.debug(f'finished_reaps: {finished_reaps}')
         if len(finished_reaps) < 3:
-            bot_msg["messages"] += bot_reappraise(user_data)
+            bot_msgs += bot_reappraise(chat_id)
         else:
-            next_state = "finished"
-            db_update_entry(chat_id, "state", next_state)
-            user_data['state'] = next_state
-            bot_msg["messages"] += bot_finished(user_data)
+            # Show transition message to reappraisal judging section
+            db_set_state(chat_id, "judge_reappraisals")
+            bot_msgs += [{
+                "sender": "bot",
+                "response": msgs["intro_judge_reappraisals"],
+                "widget_type": "text",
+                "widget_config": {
+                    "metadata": {
+                        "msg_type": "intro_judge_reappraisals"
+                    }
+                }
+            }]
+            
+    elif prev_state == "judge_reappraisals":
+        
+        reaps = db_get_reappraisals(chat_id)
+        unjudged_reaps = [reap for reap in reaps if reap.get("reap_efficacy") is None]
+        # logger.debug(request_data)
+        
+        # if the last message was judging reap success, save to db
+        if request_data['widget_config']['metadata']['msg_type'] == "reappraisal_success":
+            prev_reap_num = int(request_data['widget_config']['metadata'].get("reap_num"))
+            prev_reap_efficacy = int(request_data.get("response"))
+            prev_reap_entry = [reap for reap in reaps if reap.get("reap_num") == prev_reap_num][0]
+            assert "reap_efficacy" not in prev_reap_entry.keys(), "Reappraisal efficacy already judged"
+            db_add_reappraisal(reap_efficacy=prev_reap_efficacy, **prev_reap_entry)
+            
+        # Judge next reappraisal or finish
+        if len(unjudged_reaps) > 1:  # 1 because another reap just got added
+            bot_msgs += bot_judge_reappraisals(chat_id)
+        else:
+            # check if done
+            db_set_state(chat_id, "finished")
+            bot_msgs += bot_finished()
     
     else:
         return {"error": "Invalid state"}
     
-    return bot_msg
+    logger.debug(f'bot_msgs: {bot_msgs}')
+    return {"messages": bot_msgs}
     
         
     

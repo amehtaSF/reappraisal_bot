@@ -8,7 +8,7 @@ crisis: |
 
 
 introduction: | 
-  <p>Hi there! I am Reappraisal Bot.</p>
+  Hi there! Thank you for agreeing to participate in our study. Send any message to get started.
 
 
 solicit_issue: |
@@ -31,13 +31,21 @@ solicit_values: |
   <p><i>{value}</i></p>
 
 intro_reappraisal: |
-  We will now shift to the final part of the study. 
-  <p>In this part of the study, you will be offered 3 alternative ways of looking at the situation
-  that could potentially help you feel better. Please read each alternative perspective
-  and answer honestly the questions associated with each perspective. 
+  We will now shift to the next part of the study. 
+  <p>
+  In this part of the study, you will be offered 3 alternative ways of looking at the situation
+  that could potentially help you feel better. Please read each alternative perspective.
   </p>
-  <p>Please keep in mind that these perspectives might not help you feel better at all
-  so just answer the questions honestly whether you find the perspectives helpful or not.</p>
+  <p>Send any message to continue.</p>
+
+intro_judge_reappraisals: |
+  We will now move to the final part of the study. 
+  This phase of the study is the most important segment so we appreciate your continued attention and thoughtfulness.
+  <p>
+  You will be shown the three alternative perspectives you saw before and asked questions about your opinion on each perspective.
+  Please keep in mind that these perspectives might not have helped you feel better at all
+  so just answer the questions honestly whether you find the perspectives helpful or not.
+  </p>
   <p>Send any message to continue.</p>
 
 reappraisal_believability: |

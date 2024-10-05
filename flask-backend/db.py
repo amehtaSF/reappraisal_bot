@@ -8,8 +8,9 @@ import random
 import yaml
 from decimal import Decimal
 from dotenv import load_dotenv
+import logging
 
-
+# boto3.set_stream_logger('botocore', level=logging.DEBUG)
 
 logger = setup_logger()
 load_dotenv()
@@ -28,105 +29,187 @@ dynamodb = boto3.resource(
 )
 
 
-table = dynamodb.Table(os.getenv('DYNAMODB_TABLE_NAME'))
+
+convo_tbl = dynamodb.Table('vbr_bot_career_convos')
+state_tbl = dynamodb.Table('vbr_bot_career_state')
+msg_tbl = dynamodb.Table('vbr_bot_career_messages')
+emotions_tbl = dynamodb.Table('vbr_bot_career_emotions')
+values_tbl = dynamodb.Table('vbr_bot_career_values')
+reappraisals_tbl = dynamodb.Table('vbr_bot_career_reappraisals')
+
 
 with open("bot.yml", "r") as ymlfile:
     bot_data = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-def db_create_entry(chat_id, **kwargs):
-    '''Initialize a new entry in the table'''
-    item = {
+    
+def db_new_chat(chat_id, ip_address, **kwargs):
+    '''Initialize a new chat in the database'''
+    
+    # Create convo item
+    convo_item = {
         "chat_id": chat_id,
-        "created": datetime.now(timezone.utc).isoformat(),
-        "messages": [],  # list of dicts with keys "sender", "text", "timestamp", "widget_type", "widget_config"
-        "issue_messages": [],  # subset list of messages that are the users issue, emotions, and explanations for emotions
+        "timestamp": datetime.now(timezone.utc).isoformat(),
         "completed": 0,  # 0 if the chat is not completed, 1 if the chat is completed,
-        "state": "begin",
-        "ip_address": "",
-        "emotions": [],  # list of len 1-3 where each element is a dict with keys emotion. 
-        "vals": [],  # list of len 15 with dicts with keys "value_text", "value_num", "value_rating"
-        "reappraisals": [],  # list of len 3 with dicts with keys "reap_text", "value_text", "value_rank", "value_rating", "reap_efficacy", "reap_believability"
-        # "prolific_id": "",
-        # "person_values": {"v" + str(i+1): int(-99) for i in range(16)},
-        # "issue": "",
-        # "issue_summary_bot": "",
-        # "issue_summary": "",
-        # "crisis_input": "",
+        "ip_address": ip_address,
     }
-    item.update(kwargs)
-    table.put_item(Item=item)
+    for key, val in kwargs.items():
+        convo_item[key] = val
+    convo_tbl.put_item(Item=convo_item)
+    
+    # Create state item (keep this as separate table since it is read/written often)
+    state_item = {
+        "chat_id": chat_id,
+        "state": "begin"
+    }
+    state_tbl.put_item(Item=state_item)
+    
     return chat_id
 
 def db_add_message(chat_id, sender, data):
-    '''Add a message to the messages list in the table'''
+    '''Add a single message as a new item to the table'''
     if sender not in ["user", "bot"]:
         raise ValueError("Sender must be 'user' or 'bot'")
     msg = {
+        "chat_id": chat_id,
+        "timestamp": datetime.now(timezone.utc).isoformat(),  # Sort key
         "sender": sender,
         "response": data['response'],
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "widget_type": data['widget_type'],
+        "state": db_get_state(chat_id), #  TODO: might want to pass this around in a different way. e.g. state gets passed with everything
+        "widget_type": data.get('widget_type'),
         "widget_config": data.get("widget_config", {})
     }
-    db_append_list(chat_id, "messages", msg)
-        
+    msg_tbl.put_item(Item=msg)
 
-def db_get_entry(chat_id):
-    '''Get an entry from the table'''
-    response = table.get_item(Key={'chat_id': str(chat_id)})
-    item = response['Item']
-    return item
-
-def db_update_entry(chat_id, key, value):
-    '''Update a simple entry in the table, allowing for various data types (e.g., dict, list, etc.)'''
-    # Ensure key and value retain their original types
-    table.update_item(
+def db_set_state(chat_id, new_state):
+    '''Update the state of the conversation'''
+    state_tbl.update_item(
         Key={
-            'chat_id': str(chat_id)
+            'chat_id': chat_id
         },
-        UpdateExpression=f"set #key = :val",
+        UpdateExpression="set #s = :new_state",
         ExpressionAttributeNames={
-            '#key': key  
+            '#s': 'state'
         },
         ExpressionAttributeValues={
-            ':val': value  
-        },
-        ReturnValues="UPDATED_NEW"
+            ':new_state': new_state
+        }
     )
+
+def db_get_messages(chat_id):
+    '''Get all messages for a given chat_id'''
+    response = msg_tbl.query(
+        KeyConditionExpression=boto3.dynamodb.conditions.Key('chat_id').eq(chat_id),
+        ScanIndexForward=True  # Sort by timestamp
+    )
+    messages = response.get('Items', [])
+    return messages
+
+def db_get_issue_messages(chat_id):
+    # TODO: test this
+    issue_states = ['begin', 'solicit_issue', 'solicit_emotions', 'explain_emotions']
+    messages = db_get_messages(chat_id)
+    issue_messages = [msg for msg in messages if msg['state'] in issue_states]
+    return issue_messages
+
+ 
+def db_get_state(chat_id):
+    '''Get the current state of the conversation'''
+    response = state_tbl.get_item(Key={'chat_id': chat_id})
+    return response['Item'].get('state')
+
+def db_get_emotions(chat_id):
+    '''Get the users emotions'''
+    response = emotions_tbl.get_item(Key={'chat_id': chat_id})
+    return response['Item'].get('emotions', {})
+
+def db_get_vals(chat_id):
+    '''Get the users values'''
+    response = values_tbl.query(
+        KeyConditionExpression=boto3.dynamodb.conditions.Key('chat_id').eq(chat_id),
+        ScanIndexForward=True  # Sort by timestamp
+    )
+    vals = response.get('Items', [])
+    return vals
+
+def db_add_reappraisal(chat_id, **kwargs):
+    '''Add a reappraisal to the users reappraisals'''
+    item = {
+        'chat_id': chat_id,
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+    }
+    for key, val in kwargs.items():
+        item[key] = val
+    reappraisals_tbl.put_item(Item=item)
+
+
+def db_get_reappraisals(chat_id):
+    '''Get the users reappraisals'''
+    response = reappraisals_tbl.query(
+        KeyConditionExpression=boto3.dynamodb.conditions.Key('chat_id').eq(chat_id),
+        ScanIndexForward=True  # Sort by timestamp
+    )
+    reappraisals = response.get('Items', [])
+    return reappraisals
+
+
+
+def db_set_emotions(chat_id, emotions):
+    '''Set the users emotions'''
+    emotions_tbl.put_item(Item={'chat_id': chat_id, 'emotions': emotions})
     
-def db_update_nested_field(chat_id, list_name, index, field, new_value):
-    '''Update a specific field within a list of dictionaries at a given index.'''
-    # Update the specific field in a nested list of dictionaries
-    table.update_item(
+def db_add_value(chat_id, value_text, value_num, value_rating):
+    '''Add a value to the users values'''
+    item = {
+        'chat_id': chat_id,
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'value_text': value_text,
+        'value_num': value_num,
+        'value_rating': value_rating
+    }
+    values_tbl.put_item(Item=item)
+
+
+def db_add_reappraisal(chat_id, **kwargs):
+    '''Add a reappraisal to the users reappraisals'''
+    item = {
+        'chat_id': chat_id,
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+    }
+    for key, val in kwargs.items():
+        item[key] = val
+    reappraisals_tbl.put_item(Item=item)
+    
+
+def db_update_reappraisal(chat_id, timestamp, **kwargs):
+    '''Update a reappraisal'''
+    update_expr = "set "
+    expr_attr_vals = {}
+    for key, val in kwargs.items():
+        update_expr += f"#{key} = :{key}, "
+        expr_attr_vals[f":{key}"] = val
+    update_expr = update_expr[:-2]  # Remove trailing comma
+    expr_attr_vals[":timestamp"] = timestamp
+    response = reappraisals_tbl.update_item(
         Key={
-            'chat_id': str(chat_id)
+            'chat_id': chat_id,
+            'timestamp': timestamp
         },
-        UpdateExpression=f"set #{list_name}[{index}].{field} = :val",
+        UpdateExpression=update_expr,
+        ExpressionAttributeNames={f"#{key}": key for key in kwargs.keys()},
+        ExpressionAttributeValues=expr_attr_vals
+    )
+    return response
+
+def db_update_convo_completion(chat_id, completion: int):
+    '''Mark a conversation as completed'''
+    convo_tbl.update_item(
+        Key={
+            'chat_id': chat_id
+        },
+        UpdateExpression="set #c = :completed",
         ExpressionAttributeNames={
-            f'#{list_name}': list_name  # Ensure the list field is recognized
+            '#c': 'completed'
         },
         ExpressionAttributeValues={
-            ':val': new_value  # New value to update
-        },
-        ReturnValues="UPDATED_NEW"
+            ':completed': completion
+        }
     )
-
-def db_append_list(chat_id, key, value):
-    '''Append any value (str, dict, etc.) or extend a list of values to an existing list in the DynamoDB table'''
-
-    # Ensure the value is a list
-    if not isinstance(value, list):
-        value = [value]
-    
-    table.update_item(
-        Key={
-            'chat_id': str(chat_id)
-        },
-        UpdateExpression=f"SET {key} = list_append(if_not_exists({key}, :empty_list), :val)",
-        ExpressionAttributeValues={
-            ':val': value,
-            ':empty_list': []  # Fallback to an empty list if the key doesn't exist
-        },
-        ReturnValues="UPDATED_NEW"
-    )
-

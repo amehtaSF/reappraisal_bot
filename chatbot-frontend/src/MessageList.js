@@ -1,5 +1,5 @@
 import React from 'react';
-import DOMPurify from 'dompurify'; // Import DOMPurify
+import DOMPurify from 'dompurify'; // Sanitize HTML strings
 
 function MessageList({ messages, messageListRef }) {
   return (
