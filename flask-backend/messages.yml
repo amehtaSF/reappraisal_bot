@@ -8,7 +8,7 @@ crisis: |
 
 
 introduction: | 
-  Hi there! Thank you for agreeing to participate in our study. Send any message to get started.
+  Hi there! Thank you for agreeing to participate in our study. Respond "ok" to get started.
 
 
 solicit_issue: |
@@ -37,7 +37,7 @@ intro_reappraisal: |
   In this part of the study, you will be offered 3 alternative ways of looking at the situation
   that could potentially help you feel better. Please read each alternative perspective.
   </p>
-  <p>Send any message to continue.</p>
+  <p>Respond "ok" to continue.</p>
 
 intro_judge_reappraisals: |
   We will now move to the final part of the study. 
@@ -47,7 +47,7 @@ intro_judge_reappraisals: |
   Please keep in mind that these perspectives might not have helped you feel better at all
   so just answer the questions honestly whether you find the perspectives helpful or not.
   </p>
-  <p>Send any message to continue.</p>
+  <p>Respond "ok" to continue.</p>
 
 reappraisal_believability: |
   How believable do you find this alternative perspective on a scale of 0-100?
