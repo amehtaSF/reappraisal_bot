@@ -150,6 +150,44 @@
   padding: 5px; 
   font-size: 14px; 
 }
+/* styles.css */
+
+.ranking-widget {
+  margin: 20px 0;
+}
+
+.ranking-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  cursor: grab;
+}
+
+.ranking-item.dragging {
+  background-color: #e0e0e0;
+}
+
+.ranking-number {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.ranking-content {
+  flex-grow: 1;
+}
+
+
+.ranking-item.dragging {
+  background-color: #e0e0e0;
+}
 
 /* General styles */
 body {

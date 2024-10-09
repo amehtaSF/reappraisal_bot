@@ -4,10 +4,6 @@ import './App.css';
 
 import React from 'react';
 import ChatWindow from './ChatWindow';
-import MessageList from './MessageList';
-import InputWidget from './InputWidget';
-import TextInputWidget from './TextInputWidget';
-import SliderInputWidget from './SliderInputWidget';
 
 function App() {
 

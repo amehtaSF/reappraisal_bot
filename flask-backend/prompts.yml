@@ -12,6 +12,7 @@ value_reappraise: >
   2. Offer a new perspective or way of thinking about the issue that aligns with the value and will help the person feel better
   3. Do not explicitly mention that the person has the value. Just make a reappraisal that is consistent with the value.
   4. Do not re-state the user's issue in your response. Only offer the reappraisal.
+  5. Do not tell the person what to do. Just help them see the situation in a new light.
 
   Your response should be empathetic, supportive, and focused on helping the user see their situation in a new light that resonates with their core value.
   Your response should be 3-4 sentences long.
@@ -25,6 +26,7 @@ general_reappraise: >
   1. Acknowledge the user's feelings and the difficulty of the situation
   2. Offer a new perspective or way of thinking about the issue that will help the person feel better
   3. Do not re-state the user's issue in your response. Only offer the reappraisal.
+  4. Do not tell the person what to do. Just help them see the situation in a new light.
 
   Your response should be empathetic, supportive, and focused on helping the user see their situation in a new light that helps them feel better.
   Your response should be 3-4 sentences long.

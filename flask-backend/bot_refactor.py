@@ -134,7 +134,7 @@ class BotSolicitEmotions(Bot):
     def next_bot(self, request_data) -> Tuple[Bot, Dict[str, Any]]:
         # Parse and store selected emotions
         emotions = request_data.get("response", [])
-        emotions = [{"emotion": emo} for emo in emotions]
+        # emotions = [{"emotion": emo} for emo in emotions]
         db_set_emotions(self.chat_id, emotions)
         return BotExplainEmotions(self.chat_id, self.cur_state), {}
     
@@ -172,8 +172,8 @@ class BotExplainEmotions(Bot):
         messages = db_get_messages(self.chat_id)
         lc_history = convert_to_lc_history(messages)
         emotions = db_get_emotions(self.chat_id)
-        selected_emotions = [emo.get("emotion") for emo in emotions if emo.get("emotion")]
-        msg = explain_emotions.invoke({"messages": lc_history, "emotions": selected_emotions})
+        # selected_emotions = [emo.get("emotion") for emo in emotions if emo.get("emotion")]
+        msg = explain_emotions.invoke({"messages": lc_history, "emotions": emotions})
         return msg
     
     def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
@@ -333,17 +333,20 @@ class BotRankReappraisals(Bot):
         reaps = db_get_reappraisals(self.chat_id)
         
         # Save the user's judgment to the database
-        if request_data['widget_config']['metadata']['msg_type'] == "rank_reappraisals":
+        if self.prev_state == "rank_reappraisals":
+            logger.debug('saving reappraisal ranks')
             for reap_num, reap_rank in request_data.get("response").items():
                 reap_num = int(reap_num)
                 reap_entry = [reap for reap in reaps if reap.get("reap_num") == reap_num][0]
-                db_add_reappraisal(reap_rank=reap_rank, **reap_entry)
+                reap_entry['reap_rank'] = int(reap_rank)
+                logger.debug(f'reap_entry: {reap_entry}')
+                db_add_reappraisal(**reap_entry)
                 
         return BotJudgeReappraisals(self.chat_id, self.cur_state), {}
     
     def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
         reaps = db_get_reappraisals(self.chat_id)
-        reap_dict = {reap.get("reap_num"): reap.get("reap_text") for reap in reaps}
+        reap_dict = {str(reap.get("reap_num")): str(reap.get("reap_text")) for reap in reaps}
         
         resp = {
             "sender": "bot",
@@ -388,7 +391,7 @@ class BotJudgeReappraisals(Bot):
     
     def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
         # if switching states, introduce next phase
-        if self.prev_state == "reappraisal":
+        if self.prev_state != "judge_reappraisals":
             resp = {
                 "sender": "bot",
                 "response": msgs["intro_judge_reappraisals"],

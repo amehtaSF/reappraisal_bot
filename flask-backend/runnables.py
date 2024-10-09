@@ -27,12 +27,12 @@ with open("messages.yml", "r") as ymlfile:
 @chain
 def explain_emotions(input):
     messages = input["messages"]  # Chat history
-    emotions = input["emotions"]  # List of user-selected emotions
+    emotion_str = input["emotions"]  # String of emotions to explain
     
     # Create the list of emotions string to be inserted into the prompt
-    emotion_str = ""
-    for i, emo in enumerate(emotions):
-        emotion_str += f"<emotion{i+1}>{emo}</emotion{i+1}>\n"
+    # emotion_str = ""
+    # for i, emo in enumerate(emotions):
+    #     emotion_str += f"<emotion{i+1}>{emo}</emotion{i+1}>\n"
         
     # Call the model
     system_msg = [ChatPromptTemplate.from_template(prompts["explain_emo"])]

@@ -3,6 +3,7 @@ import TextInputWidget from './TextInputWidget';
 import MultiSelectInputWidget from './MultiSelectInputWidget';
 import MultiSelectTextInputWidget from './MultiSelectTextInputWidget';
 import SliderInputWidget from './SliderInputWidget'; 
+import RankingWidget from './RankingWidget';
 
 function InputWidget({ widgetType = 'text', onSend, widgetConfig = {} }) {  
   const [isSending, setIsSending] = useState(false);  // Track if message is being sent
@@ -12,6 +13,7 @@ function InputWidget({ widgetType = 'text', onSend, widgetConfig = {} }) {
     multiselect: MultiSelectInputWidget,
     multiselecttext: MultiSelectTextInputWidget,
     slider: SliderInputWidget,
+    ranking: RankingWidget
   };
 
   const WidgetComponent = widgetComponents[widgetType] || TextInputWidget;
