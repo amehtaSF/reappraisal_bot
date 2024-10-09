@@ -19,7 +19,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 from db import db_new_chat, db_add_message
-from bot import parse_user_message
+# from bot import parse_user_message
+from bot_refactor import process_next_step
 
 logger = setup_logger()
 
@@ -82,13 +83,11 @@ def chat():
     }
     db_add_message(chat_id, "user", user_msg)
     logger.debug(f'user message received: {format_json(user_msg, indent=2)}')
-    user_widget_type = request_data.get('widget_type')
-    user_widget_config = request_data.get('widget_config', {})
     user_message = request_data.get('response')
-    print(f'user_message: {user_message}')
+    logger.debug(f'user_message: {user_message}')
     
     # Parse out specific data from the user message and get next message
-    next_bot_msgs = parse_user_message(chat_id, request_data)
+    next_bot_msgs = process_next_step(chat_id, request_data)
     logger.debug(next_bot_msgs)
     for message in next_bot_msgs['messages']:
         db_add_message(chat_id, "bot", message)

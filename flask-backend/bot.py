@@ -318,7 +318,7 @@ def parse_user_message(chat_id, request_data):
         # If state is ongoing...
         else:
             bot_msgs += bot_msg_explain_emos
-    
+
     elif prev_state == "solicit_values":
         
         # Save values to database

@@ -49,6 +49,9 @@ intro_judge_reappraisals: |
   </p>
   <p>Respond "ok" to continue.</p>
 
+rank_reappraisals: |
+  Please rank the three alternative perspectives from most helpful to least helpful.
+
 reappraisal_believability: |
   How believable do you find this alternative perspective on a scale of 0-100?
 

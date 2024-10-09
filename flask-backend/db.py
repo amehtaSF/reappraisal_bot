@@ -53,14 +53,18 @@ def db_new_chat(chat_id, ip_address, **kwargs):
     }
     for key, val in kwargs.items():
         convo_item[key] = val
-    convo_tbl.put_item(Item=convo_item)
+    convo_tbl_put = convo_tbl.put_item(Item=convo_item)
+    logger.debug(f'new chat created: {convo_item}')
+    logger.debug(convo_tbl_put)
     
     # Create state item (keep this as separate table since it is read/written often)
     state_item = {
         "chat_id": chat_id,
         "state": "begin"
     }
-    state_tbl.put_item(Item=state_item)
+    state_tbl_put = state_tbl.put_item(Item=state_item)
+    logger.debug(f'new state created: {state_item}')
+    logger.debug(state_tbl_put)
     
     return chat_id
 
