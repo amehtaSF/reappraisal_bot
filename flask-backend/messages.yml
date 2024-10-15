@@ -37,7 +37,7 @@ intro_reappraisal: |
   In this part of the study, you will be offered 3 alternative ways of looking at the situation
   that could potentially help you feel better. Please read each alternative perspective.
   </p>
-  <p>Respond "ok" to continue.</p>
+  <p>Send any message to continue.</p>
 
 intro_judge_reappraisals: |
   We will now move to the final part of the study. 
@@ -47,7 +47,7 @@ intro_judge_reappraisals: |
   Please keep in mind that these perspectives might not have helped you feel better at all
   so just answer the questions honestly whether you find the perspectives helpful or not.
   </p>
-  <p>Respond "ok" to continue.</p>
+  <p>Send any message to continue.</p>
 
 rate_neg: |
   Please rate how <strong>negatively</strong> you feel about this situation on a scale of 0-100:

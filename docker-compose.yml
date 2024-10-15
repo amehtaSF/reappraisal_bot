@@ -1,4 +1,3 @@
-
 services:
   flask-backend:
     build: ./flask-backend
@@ -6,6 +5,8 @@ services:
       - "8000"  # Flask backend runs on port 8000
     environment:
       - FLASK_ENV=production
+    volumes:
+      - ./flask-backend/logs:/app/logs  # Map container logs dir to host logs dir
 
   chatbot-frontend:
     build: ./chatbot-frontend
