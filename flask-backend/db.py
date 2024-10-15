@@ -1,5 +1,5 @@
 import boto3
-from logger_setup import setup_logger
+from .logger_setup import setup_logger
 import os
 import uuid
 from datetime import datetime, timezone
@@ -155,7 +155,6 @@ def db_get_reappraisals(chat_id):
     return reappraisals
 
 
-
 def db_set_emotions(chat_id, emotions):
     '''Set the users emotions'''
     emotions_tbl.put_item(Item={'chat_id': chat_id, 'emotions': emotions})
@@ -217,3 +216,36 @@ def db_update_convo_completion(chat_id, completion: int):
             ':completed': completion
         }
     )
+    
+def db_add_neg_rating(chat_id, rating):
+    '''Add a negative rating to the conversation'''
+    response = convo_tbl.update_item(
+        Key={
+            'chat_id': chat_id
+        },
+        UpdateExpression="set #ni = :rating",
+        ExpressionAttributeNames={
+            '#ni': 'neg_intensity'
+        },
+        ExpressionAttributeValues={
+            ':rating': rating
+        }
+    )
+    return response
+
+def db_add_pos_rating(chat_id, rating):
+    '''Add a positive rating to the conversation'''
+    response = convo_tbl.update_item(
+        Key={
+            'chat_id': chat_id
+        },
+        UpdateExpression="set #pi = :rating",
+        ExpressionAttributeNames={
+            '#pi': 'pos_intensity'
+        },
+        ExpressionAttributeValues={
+            ':rating': rating
+        }
+    )
+    return response
+    

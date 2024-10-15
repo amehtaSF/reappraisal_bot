@@ -34,25 +34,11 @@ TABLE_PREFIX = "vbr_bot_career"
 RCU = 5
 WCU = 5
 
-'''
-New DB schema
-
-Tables - primary key, sort key:
-- Messages - chat_id, timestamp: 1 item = 1 message (note: i should tag them with if they are the issue or not)
-- State - chat_id - 1 item = 1 conversation
-- Emotions - chat_id, timestamp: 1 item = 1 user
-    - dict with single key "emotion" (some day will expand to put "reason")
-- Values - chat_id: 1 item = 1 value
-- Reappraisals - chat_id: 1 item = 1 reappraisal
-    - dict with keys "reap_text", "reap_num", "value_text", "value_rank", "value_rating", "reap_efficacy"
-- Conversations - chat_id: 1 item = 1 user :: columns: chat_id, created, completed, ip_address
-'''
-
 tables = [
     {
         "table_name": f"{TABLE_PREFIX}_convos",
         "partition_key": ("chat_id", "S"),
-        "sort_key": ("timestamp", "S"),
+        # "sort_key": ("timestamp", "S"),
     },
     {
         "table_name": f"{TABLE_PREFIX}_messages",
@@ -126,4 +112,4 @@ for tbl in tables:
     # Wait until the table exists
     table.meta.client.get_waiter('table_exists').wait(TableName=tbl["table_name"])
 
-    print(f"Table status: {table.table_status}")
+    logger.debug(f"Table status: {table.table_status}")

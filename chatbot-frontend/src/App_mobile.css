@@ -1,18 +1,10 @@
-/* Base Styles */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
-  margin: 0;
-  padding: 0;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+/* Global box-sizing for better control over element sizing */
+* {
+  box-sizing: border-box;
 }
 
 .App {
   text-align: center;
-  width: 100%;
-  margin: 0 auto;
 }
 
 .App-logo {
@@ -41,42 +33,34 @@ body {
   color: white;
 }
 
-.App-header h1 {
-  font-size: calc(18px + 2vmin); /* Base font size that adjusts for larger screens */
-  color: white;
-  margin: 0;
-  text-align: center;
-}
-
 .App-link {
   color: #61dafb;
 }
 
-/* Chat Window Styles */
+/* Chat window styles */
 .chat-window {
-  margin: 0 auto;
-  width: 80%;
-  max-width: 1000px;
-  min-width: 600px;
-  height: 700px;
+  width: 90%; /* Utilize more of the screen */
+  max-width: 1200px; /* Prevents it from being too wide */
+  height: 80vh; /* Fixed height based on viewport */
+  min-height: 400px; /* Ensures it doesn't shrink below this size */
   background-color: #fff;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; /* Prevents resizing based on content */
   padding: 15px;
+  margin: 0 auto; /* Center the chat window */
 }
 
-/* Message List */
+/* Message Display */
 .message-list {
-  overflow-y: auto;
-  margin-bottom: 20px;
+  flex-grow: 1; /* Allows the message list to take up available space */
+  overflow-y: auto; /* Enables scrolling when there are too many messages */
+  margin-bottom: 10px;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  flex: 1;
   border-bottom: 1px solid #ddd;
+  max-height: 100%; /* Ensures it doesn't grow with content */
 }
 
 .message {
@@ -89,35 +73,31 @@ body {
 
 .user-message {
   background-color: #daf1ff;
-  align-self: flex-end;
   text-align: left;
 }
 
 .bot-message {
   background-color: #f1f1f1;
-  align-self: flex-start;
   text-align: left;
 }
 
-/* Input Widgets */
-.text-input-widget,
-.multiselect-input-widget,
-.slider-input-widget {
-  padding: 15px;
+/* Input widget styles */
+.input-widget {
   display: flex;
   align-items: center;
+  padding: 10px;
+  background-color: #f4f4f4;
+  border-top: 1px solid #ddd;
 }
 
 .text-input-widget input {
   flex: 1;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
   margin-right: 10px;
   height: 40px;
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
 .text-input-widget button {
@@ -135,7 +115,7 @@ body {
   background-color: #0056b3;
 }
 
-/* Slider Widget */
+/* Slider widget */
 .slider-input-widget input[type='range'] {
   flex: 1;
   margin-right: 10px;
@@ -147,7 +127,7 @@ body {
   font-size: 16px;
 }
 
-/* Multiselect Widget */
+/* Multiselect widget */
 .multiselect-input-widget {
   flex-direction: column;
   max-height: 150px;
@@ -179,7 +159,14 @@ body {
   background-color: #0056b3;
 }
 
-/* Ranking Widget */
+.multiselect-text-input {
+  width: 75%;
+  height: 80px;
+  padding: 5px;
+  font-size: 14px;
+}
+
+/* Ranking widget */
 .ranking-widget {
   margin: 20px 0;
 }
@@ -199,6 +186,10 @@ body {
   cursor: grab;
 }
 
+.ranking-item.dragging {
+  background-color: #e0e0e0;
+}
+
 .ranking-number {
   font-weight: bold;
   margin-right: 10px;
@@ -208,65 +199,27 @@ body {
   flex-grow: 1;
 }
 
-.ranking-item.dragging {
-  background-color: #e0e0e0;
+/* General styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-/* Responsive Styles */
-
-/* Mobile Devices */
-@media (max-width: 480px) {
-  .App-header h1 {
-    font-size: 10px; /* Smaller font size for mobile devices */
-  }
+/* Media query for mobile responsiveness */
+@media (max-width: 600px) {
   .chat-window {
     width: 100%;
-    height: auto;
-    min-height: 500px;
-    padding: 10px;
+    height: 100vh; /* Full height on mobile */
+    border-radius: 0;
   }
-  .text-input-widget input {
-    font-size: 14px;
-  }
-  .text-input-widget button {
-    font-size: 14px;
-  }
-}
 
-/* Tablets */
-@media (min-width: 481px) and (max-width: 768px) {
-  .chat-window {
-    width: 90%;
-    height: 600px;
-  }
-  .text-input-widget input {
-    font-size: 14px;
-  }
-  .text-input-widget button {
-    font-size: 14px;
-  }
-}
-
-/* Small Screens and Laptops */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .chat-window {
-    width: 85%;
-    height: 650px;
-  }
-}
-
-/* Desktops */
-@media (min-width: 1025px) and (max-width: 1200px) {
-  .chat-window {
-    width: 80%;
-    height: 700px;
-  }
-}
-
-/* Extra Large Screens (TVs) */
-@media (min-width: 1201px) {
-  .chat-window {
-    width: 70%;
-    max-width: 1200px;
+  .message-list {
+    max-height: calc(100vh - 150px); /* Adjust for input widget height */
   }
 }

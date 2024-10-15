@@ -1,0 +1,167 @@
+/* App.css */
+
+/* Reset some default styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+}
+
+.App {
+  margin: 20px auto;
+  height: calc(100vh - 40px);
+  max-width: 600px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #ddd;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  padding-top: 1px; /* Add this line */
+}
+
+.App h1 {
+  text-align: center;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  padding: 20px;
+  margin-top: 0;
+  margin: 0;
+  font-size: 48px;
+}
+
+.chat-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.message-list {
+  flex: 1;
+  overflow-y: auto; /* Enable vertical scrolling */
+  margin-bottom: 10px;
+  padding: 10px;
+  word-wrap: break-word;
+}
+
+.message {
+  display: flex;
+  margin-bottom: 10px;
+  clear: both;
+  max-width: 80%;
+  padding: 10px;
+  border-radius: 15px;
+  position: relative;
+  word-wrap: break-word;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bot-message {
+  align-self: flex-start;
+  background-color: #e0e0e0;
+  color: #000;
+  border-bottom-left-radius: 0;
+}
+
+.user-message {
+  align-self: flex-end;
+  background-color: #0084FF;
+  color: #fff;
+  border-bottom-right-radius: 0;
+}
+
+.input-widget {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #ddd;
+  border-top: 1px solid #ccc;
+  flex-shrink: 0; /* Prevent it from shrinking */
+}
+
+
+.text-input-widget {
+  display: flex;
+  width: 100%;
+}
+
+.text-input-widget input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.text-input-widget input:focus {
+  border-color: #4CAF50;
+}
+
+.text-input-widget input:disabled {
+  background-color: #eee;
+  cursor: not-allowed;
+}
+
+.text-input-widget button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.text-input-widget button:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.text-input-widget button:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.message-list::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.message-list::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+/* Media Query for Small Screens (Width <= 600px) */
+@media screen and (max-width: 600px) {
+  .App {
+      width: 100%;
+      margin: 10px auto;
+      height: calc(100vh - 20px);
+  }
+  .message {
+      max-width: 100%;
+  }
+  .text-input-widget button {
+      margin-left: 5px;
+  }
+}
+
+/* Media Query for Short Screens (Height <= 500px) */
+@media screen and (max-height: 500px) {
+  .App {
+      margin: 10px auto;
+      height: calc(100vh - 20px);
+  }
+}

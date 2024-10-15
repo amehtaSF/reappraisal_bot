@@ -1,18 +1,5 @@
-/* Base Styles */
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f9;
-  margin: 0;
-  padding: 0;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
 .App {
   text-align: center;
-  width: 100%;
-  margin: 0 auto;
 }
 
 .App-logo {
@@ -41,35 +28,13 @@ body {
   color: white;
 }
 
-.App-header h1 {
-  font-size: calc(18px + 2vmin); /* Base font size that adjusts for larger screens */
-  color: white;
-  margin: 0;
-  text-align: center;
-}
-
 .App-link {
   color: #61dafb;
 }
 
-/* Chat Window Styles */
-.chat-window {
-  margin: 0 auto;
-  width: 80%;
-  max-width: 1000px;
-  min-width: 600px;
-  height: 700px;
-  background-color: #fff;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 15px;
-}
-
-/* Message List */
+/* Message Display */
 .message-list {
+  max-height: 600px;
   overflow-y: auto;
   margin-bottom: 20px;
   padding: 10px;
@@ -90,7 +55,7 @@ body {
 .user-message {
   background-color: #daf1ff;
   align-self: flex-end;
-  text-align: left;
+  text-align: right;
 }
 
 .bot-message {
@@ -99,7 +64,7 @@ body {
   text-align: left;
 }
 
-/* Input Widgets */
+/* Input widget styles */
 .text-input-widget,
 .multiselect-input-widget,
 .slider-input-widget {
@@ -110,19 +75,19 @@ body {
 
 .text-input-widget input {
   flex: 1;
-  padding: 8px;
+  padding: 8px; /* Reduced padding */
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 16px;
   margin-right: 10px;
-  height: 40px;
+  height: 40px; /* Fixed height to match the button */
   max-width: 100%;
-  box-sizing: border-box;
+  box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
 .text-input-widget button {
-  height: 40px;
-  padding: 0 20px;
+  height: 40px; /* Match the height to the input */
+  padding: 0 20px; /* Adjust padding for a bigger button */
   font-size: 16px;
   background-color: #007bff;
   color: #fff;
@@ -135,7 +100,7 @@ body {
   background-color: #0056b3;
 }
 
-/* Slider Widget */
+/* Slider widget */
 .slider-input-widget input[type='range'] {
   flex: 1;
   margin-right: 10px;
@@ -147,7 +112,7 @@ body {
   font-size: 16px;
 }
 
-/* Multiselect Widget */
+/* Multiselect widget */
 .multiselect-input-widget {
   flex-direction: column;
   max-height: 150px;
@@ -179,7 +144,14 @@ body {
   background-color: #0056b3;
 }
 
-/* Ranking Widget */
+.multiselect-text-input{
+  width: 75%; 
+  height: 80px; 
+  padding: 5px; 
+  font-size: 14px; 
+}
+/* styles.css */
+
 .ranking-widget {
   margin: 20px 0;
 }
@@ -199,6 +171,10 @@ body {
   cursor: grab;
 }
 
+.ranking-item.dragging {
+  background-color: #e0e0e0;
+}
+
 .ranking-number {
   font-weight: bold;
   margin-right: 10px;
@@ -208,65 +184,32 @@ body {
   flex-grow: 1;
 }
 
+
 .ranking-item.dragging {
   background-color: #e0e0e0;
 }
 
-/* Responsive Styles */
-
-/* Mobile Devices */
-@media (max-width: 480px) {
-  .App-header h1 {
-    font-size: 10px; /* Smaller font size for mobile devices */
-  }
-  .chat-window {
-    width: 100%;
-    height: auto;
-    min-height: 500px;
-    padding: 10px;
-  }
-  .text-input-widget input {
-    font-size: 14px;
-  }
-  .text-input-widget button {
-    font-size: 14px;
-  }
+/* General styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-/* Tablets */
-@media (min-width: 481px) and (max-width: 768px) {
-  .chat-window {
-    width: 90%;
-    height: 600px;
-  }
-  .text-input-widget input {
-    font-size: 14px;
-  }
-  .text-input-widget button {
-    font-size: 14px;
-  }
-}
-
-/* Small Screens and Laptops */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .chat-window {
-    width: 85%;
-    height: 650px;
-  }
-}
-
-/* Desktops */
-@media (min-width: 1025px) and (max-width: 1200px) {
-  .chat-window {
-    width: 80%;
-    height: 700px;
-  }
-}
-
-/* Extra Large Screens (TVs) */
-@media (min-width: 1201px) {
-  .chat-window {
-    width: 70%;
-    max-width: 1200px;
-  }
+.chat-window {
+  width: 600px;
+  max-width: 100%;
+  height: 700px;
+  background-color: #fff;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 15px;
 }

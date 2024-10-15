@@ -49,8 +49,15 @@ intro_judge_reappraisals: |
   </p>
   <p>Respond "ok" to continue.</p>
 
+rate_neg: |
+  Please rate how <strong>negatively</strong> you feel about this situation on a scale of 0-100:
+
+rate_pos: |
+  Please rate how <strong>positively</strong> you feel about this situation on a scale of 0-100:
+
 rank_reappraisals: |
-  Please rank the three alternative perspectives from most helpful to least helpful.
+  Please rank the three alternative perspectives in how helpful they are for helping you feel better.
+  Rank them from 1-3, with 1 being the most helpful and 3 being the least helpful.
 
 reappraisal_believability: |
   How believable do you find this alternative perspective on a scale of 0-100?

@@ -1,77 +1,88 @@
+// RankingWidget.js
 import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-function RankingWidget({ onSend, item_dict, isSending }) {
-  // Convert item_dict to an array of items with id and content
-  const [items, setItems] = useState([]);
+function RankingWidget({ onSend, item_dict = {}, isSending }) {
+  const [rankings, setRankings] = useState({});
+  const [error, setError] = useState('');
+
+  const itemKeys = Object.keys(item_dict);
+  const numItems = itemKeys.length;
 
   useEffect(() => {
-    const initialItems = Object.entries(item_dict).map(([id, content]) => ({
-      id: id.toString(), // Ensure id is a string
-      content: content,
+    // Initialize rankings only if the length of rankings and itemKeys differs
+    if (itemKeys.length !== Object.keys(rankings).length) {
+      const initialRankings = {};
+      itemKeys.forEach((key) => {
+        initialRankings[key] = ''; // Ensure initialization to empty string
+      });
+      setRankings(initialRankings); // Set initial rankings
+    }
+  }, [item_dict, itemKeys.length, rankings]);
+
+  const handleChange = (key, value) => {
+    // Update the ranking for the given item key
+    setRankings((prev) => ({
+      ...prev,
+      [key]: value,
     }));
-    setItems(initialItems);
-  }, [item_dict]);
+  };
 
-  const onDragEnd = (result) => {
-    if (!result.destination) return;
-
-    const reorderedItems = Array.from(items);
-    const [movedItem] = reorderedItems.splice(result.source.index, 1);
-    reorderedItems.splice(result.destination.index, 0, movedItem);
-
-    setItems(reorderedItems);
+  const validateRankings = () => {
+    const values = Object.values(rankings).map((val) => parseInt(val, 10));
+    // Check if all values are numbers between 1 and numItems
+    for (let val of values) {
+      if (isNaN(val) || val < 1 || val > numItems) {
+        setError(`Please enter numbers between 1 and ${numItems}`);
+        return false;
+      }
+    }
+    // Check for duplicates
+    const uniqueValues = new Set(values);
+    if (uniqueValues.size !== numItems) {
+      setError('Each ranking must be unique');
+      return false;
+    }
+    setError('');
+    return true;
   };
 
   const handleSend = () => {
-    // Create a dictionary mapping item ids to their new ranks
-    const rankDict = {};
-    items.forEach((item, index) => {
-      rankDict[item.id] = index + 1; // Ranks start from 1
-    });
-    onSend(rankDict);
+    if (validateRankings()) {
+      onSend(rankings);
+    }
   };
 
   return (
     <div className="ranking-widget">
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="rankingList">
-          {(provided) => (
-            <ul
-              className="ranking-list"
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-            >
-              {items.map((item, index) => (
-                <Draggable
-                  key={item.id}
-                  draggableId={item.id}
-                  index={index}
-                  isDragDisabled={isSending}
-                >
-                  {(provided, snapshot) => (
-                    <li
-                      className={`ranking-item ${snapshot.isDragging ? 'dragging' : ''}`}
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      <span className="ranking-number">{index + 1}.</span>
-                      <span className="ranking-content">{item.content}</span>
-                    </li>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </ul>
-          )}
-        </Droppable>
-      </DragDropContext>
-      <button onClick={handleSend} disabled={isSending}>
+      <form className="ranking-form">
+        {itemKeys.map((key) => (
+          <div key={key} className="ranking-item">
+            <label className="ranking-label">
+              <select
+                className="ranking-dropdown"
+                value={rankings[key] || ''}
+                onChange={(e) => handleChange(key, e.target.value)}
+                disabled={isSending}
+              >
+                <option value="">Rank</option>
+                {Array.from({ length: numItems }, (_, i) => i + 1).map((num) => (
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
+                ))}
+              </select>
+              <span className="ranking-text">{item_dict[key]}</span>
+            </label>
+          </div>
+        ))}
+      </form>
+      {error && <div className="error">{error}</div>}
+      <button className="send-button" onClick={handleSend} disabled={isSending}>
         Send
       </button>
     </div>
   );
+  
 }
 
 export default RankingWidget;

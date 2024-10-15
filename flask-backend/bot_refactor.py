@@ -1,4 +1,4 @@
-from logger_setup import setup_logger
+from .logger_setup import setup_logger
 import yaml
 from langchain.schema import HumanMessage, AIMessage
 from typing import Literal, Dict, Any, List, Tuple
@@ -7,8 +7,7 @@ import json
 import random
 from decimal import Decimal
 from datetime import datetime
-from db import (
-    db_add_message, 
+from .db import (
     db_add_value, 
     db_add_reappraisal,
     db_set_state, 
@@ -18,9 +17,12 @@ from db import (
     db_get_messages, 
     db_get_issue_messages, 
     db_get_reappraisals, 
-    db_get_emotions
+    db_get_emotions,
+    db_add_neg_rating,
+    db_add_pos_rating,
+    db_update_convo_completion
 )
-from runnables import explain_emotions, generate_value_reap, generate_general_reap
+from .runnables import explain_emotions, generate_value_reap, generate_general_reap
 
 
 
@@ -163,8 +165,8 @@ class BotExplainEmotions(Bot):
         which will serve as the next message'''
         llm_msg = self.get_llm_response()
         if "::finished::" in llm_msg:
-            db_set_state(self.chat_id, "solicit_values")
-            return BotSolicitValues(self.chat_id, self.cur_state), {}
+            db_set_state(self.chat_id, "rate_neg")
+            return BotRateNeg(self.chat_id, self.cur_state), {}
         return BotExplainEmotions(self.chat_id, self.cur_state), {"msg": llm_msg}
     
     def get_llm_response(self):
@@ -189,6 +191,61 @@ class BotExplainEmotions(Bot):
             }
         }
         return [resp]
+    
+class BotRateNeg(Bot):
+        
+        def __init__(self, chat_id, prev_state):
+            self.cur_state = "rate_neg"
+            super().__init__(chat_id=chat_id, prev_state=prev_state)
+            
+        def next_bot(self, request_data) -> Tuple[Bot, Dict[str, Any]]:
+            db_add_neg_rating(self.chat_id, request_data.get("response"))
+            return BotRatePos(self.chat_id, self.cur_state), {}
+        
+        def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
+            resp = {
+                "sender": "bot",
+                "response": msgs["rate_neg"],
+                "widget_type": "slider",
+                "widget_config": {
+                    "metadata": {
+                        "msg_type": "rate_neg"
+                    },
+                    "min": 0,
+                    "max": 100,
+                    "start": 50,
+                    "step": 1
+                }
+            }
+            return [resp]
+
+class BotRatePos(Bot):
+    
+    def __init__(self, chat_id, prev_state):
+        self.cur_state = "rate_pos"
+        super().__init__(chat_id=chat_id, prev_state=prev_state)
+        
+    def next_bot(self, request_data) -> Tuple[Bot, Dict[str, Any]]:
+        db_add_pos_rating(self.chat_id, request_data.get("response"))
+        return BotSolicitValues(self.chat_id, self.cur_state), {}
+    
+    def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
+        resp = {
+            "sender": "bot",
+            "response": msgs["rate_pos"],
+            "widget_type": "slider",
+            "widget_config": {
+                "metadata": {
+                    "msg_type": "rate_pos"
+                },
+                "min": 0,
+                "max": 100,
+                "start": 50,
+                "step": 1
+            }
+        }
+        return [resp]
+        
     
 class BotSolicitValues(Bot):
     
@@ -347,14 +404,20 @@ class BotRankReappraisals(Bot):
     def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
         reaps = db_get_reappraisals(self.chat_id)
         reap_dict = {str(reap.get("reap_num")): str(reap.get("reap_text")) for reap in reaps}
+        # sorted_reap_list = sorted(reaps, key=lambda x: int(x['reap_num']))
+        # reap_texts = [item['reap_text'] for item in sorted_reap_list]
+
         
         resp = {
             "sender": "bot",
             "response": msgs["rank_reappraisals"],
             "widget_type": "ranking",
             "widget_config": {
-                "msg_type": "rank_reappraisals",
+                "metadata": {
+                    "msg_type": "rank_reappraisals",
+                },
                 "item_dict": reap_dict
+                # "itemsList": reap_texts
             }
         }
         return [resp]
@@ -456,6 +519,7 @@ class BotGoodbye(Bot):
             "widget_type": "text",
             "widget_config": {}
         }
+        db_update_convo_completion(self.chat_id, 1)
         return [resp]
 
 
@@ -500,6 +564,8 @@ def process_next_step(chat_id, request_data):
         "solicit_issue": BotSolicitIssue,
         "solicit_emotions": BotSolicitEmotions,
         "explain_emotions": BotExplainEmotions,
+        "rate_neg": BotRateNeg,
+        "rate_pos": BotRatePos,
         "solicit_values": BotSolicitValues,
         "reappraisal": BotReappraisal,
         "rank_reappraisals": BotRankReappraisals,

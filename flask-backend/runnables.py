@@ -1,6 +1,6 @@
 
 import yaml
-from logger_setup import setup_logger
+from .logger_setup import setup_logger
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate

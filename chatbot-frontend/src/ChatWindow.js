@@ -24,7 +24,7 @@ function ChatWindow() {
             try {
                 const pid = getQueryParams();
                 const payload = pid ? { pid } : {};
-                const response = await axios.post("/api/login", payload); 
+                const response = await axios.post(`${API_URL}/api/login`, payload); 
                 const token = response.data.access_token;
                 setJwtToken(token);
             } catch (error) {
@@ -42,7 +42,7 @@ function ChatWindow() {
             try {
                 // Call the chat API without a participant message
                 const response = await axios.post(
-                    "/api/chat",
+                    `${API_URL}/api/chat`,
                     { response: '', widget_type: widgetType, widget_config: widgetConfig },
                     { headers: { Authorization: `Bearer ${jwtToken}` } }
                 );
@@ -82,10 +82,15 @@ function ChatWindow() {
     }, [messages]);
 
     const sendMessage = async (userMessage) => {
-        // Show the user's message immediately
+        // Display only the ranking values in the chat
+        const displayMessage =
+          typeof userMessage === 'object'
+            ? Object.values(userMessage).join(', ')  // Show only the values (rankings)
+            : userMessage;
+      
         setMessages((prevMessages) => [
-            ...prevMessages,
-            { sender: 'user', text: userMessage }
+          ...prevMessages,
+          { sender: 'user', text: displayMessage },
         ]);
 
         if (!jwtToken) {
@@ -96,7 +101,7 @@ function ChatWindow() {
         try {
             // Send the user's message to the API and get the bot's response
             const response = await axios.post(
-                "/api/chat",
+                `${API_URL}/api/chat`,
                 { response: userMessage, widget_type: widgetType, widget_config: widgetConfig },
                 { headers: { Authorization: `Bearer ${jwtToken}` } }
             );
@@ -117,8 +122,8 @@ function ChatWindow() {
                     messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
                 }
 
-                // Wait for 1 second before displaying the next message
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+                // Wait for .5 second before displaying the next message
+                await new Promise((resolve) => setTimeout(resolve, 500));
             }
         } catch (error) {
             console.error('Error sending message:', error);
