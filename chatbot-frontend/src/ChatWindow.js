@@ -24,7 +24,8 @@ function ChatWindow() {
             try {
                 const pid = getQueryParams();
                 const payload = pid ? { pid } : {};
-                const response = await axios.post(`${API_URL}/api/login`, payload); 
+                // const response = await axios.post(`${API_URL}/api/login`, payload); 
+                const response = await axios.post("/api/login", payload); 
                 const token = response.data.access_token;
                 setJwtToken(token);
             } catch (error) {
@@ -42,7 +43,7 @@ function ChatWindow() {
             try {
                 // Call the chat API without a participant message
                 const response = await axios.post(
-                    `${API_URL}/api/chat`,
+                    "/api/chat",
                     { response: '', widget_type: widgetType, widget_config: widgetConfig },
                     { headers: { Authorization: `Bearer ${jwtToken}` } }
                 );
@@ -101,7 +102,7 @@ function ChatWindow() {
         try {
             // Send the user's message to the API and get the bot's response
             const response = await axios.post(
-                `${API_URL}/api/chat`,
+                "/api/chat",
                 { response: userMessage, widget_type: widgetType, widget_config: widgetConfig },
                 { headers: { Authorization: `Bearer ${jwtToken}` } }
             );

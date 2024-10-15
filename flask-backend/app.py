@@ -1,5 +1,5 @@
 
-from .logger_setup import setup_logger
+from logger_setup import setup_logger
 import json
 from flask import Flask, request, jsonify
 from langchain_community.chat_message_histories import (
@@ -18,9 +18,9 @@ import uuid
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
-from .db import db_new_chat, db_add_message
+from db import db_new_chat, db_add_message
 # from bot import parse_user_message
-from .bot_refactor import process_next_step
+from bot_refactor import process_next_step
 
 logger = setup_logger()
 

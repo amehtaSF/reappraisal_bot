@@ -1,4 +1,4 @@
-from .logger_setup import setup_logger
+from logger_setup import setup_logger
 import yaml
 from langchain.schema import HumanMessage, AIMessage
 from typing import Literal, Dict, Any, List, Tuple
@@ -7,7 +7,7 @@ import json
 import random
 from decimal import Decimal
 from datetime import datetime
-from .db import (
+from db import (
     db_add_value, 
     db_add_reappraisal,
     db_set_state, 
@@ -22,7 +22,7 @@ from .db import (
     db_add_pos_rating,
     db_update_convo_completion
 )
-from .runnables import explain_emotions, generate_value_reap, generate_general_reap
+from runnables import explain_emotions, generate_value_reap, generate_general_reap
 
 
 

@@ -1,5 +1,5 @@
 import boto3
-from .logger_setup import setup_logger
+from logger_setup import setup_logger
 import os
 import uuid
 from datetime import datetime, timezone
