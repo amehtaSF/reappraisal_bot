@@ -59,7 +59,7 @@ def login():
     new_chat = {"chat_id": chat_id, "ip_address": ip_address}
     if pid:
         new_chat["pid"] = pid
-    db_new_chat(chat_id, ip_address)
+    db_new_chat(**new_chat)
     logger.debug(f'new chat created: {format_json(new_chat, indent=2)}')
     
     return jsonify(access_token=access_token), 200
