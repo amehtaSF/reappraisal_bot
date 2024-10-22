@@ -107,6 +107,11 @@ def db_get_messages(chat_id):
     messages = response.get('Items', [])
     return messages
 
+def db_get_pid(chat_id):
+    '''Get the PID of the user'''
+    response = convo_tbl.get_item(Key={'chat_id': chat_id})
+    return response['Item'].get('pid')
+
 def db_get_issue_messages(chat_id):
     # TODO: test this
     issue_states = ['begin', 'solicit_issue', 'solicit_emotions', 'explain_emotions']

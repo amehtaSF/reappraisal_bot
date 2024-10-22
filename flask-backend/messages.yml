@@ -8,7 +8,7 @@ crisis: |
 
 
 introduction: | 
-  Hi there! Thank you for agreeing to participate in our study. Respond "ok" to get started.
+  Hi there! Thank you for agreeing to participate in our study. Send any message to get started.
 
 
 solicit_issue: |
@@ -67,4 +67,4 @@ reappraisal_success: |
 
 
 finished: |
-  This study is now complete. Thank you for your thoughtful participation!
+  Please follow this link to complete the study: <a href="https://stanforduniversity.qualtrics.com/jfe/form/SV_5uNxWrysTF9LaPY?pid={pid}">Complete Study</a>

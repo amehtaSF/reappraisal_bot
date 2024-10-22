@@ -20,7 +20,8 @@ from db import (
     db_get_emotions,
     db_add_neg_rating,
     db_add_pos_rating,
-    db_update_convo_completion
+    db_update_convo_completion,
+    db_get_pid
 )
 from runnables import explain_emotions, generate_value_reap, generate_general_reap
 
@@ -513,9 +514,10 @@ class BotGoodbye(Bot):
         return None, {}
     
     def generate_messages(self, **kwargs) -> List[Dict[str, Any]]:
+        pid = db_get_pid(self.chat_id)
         resp = {
             "sender": "bot",
-            "response": msgs["finished"],
+            "response": msgs["finished"].format(pid=pid),
             "widget_type": "text",
             "widget_config": {}
         }
